@@ -368,7 +368,8 @@ function player:draw()
   end
   ]]--
   
-  for i = 0, 5 do
+  -- Temp Health Bar
+  for i = 0, player.health / 20 do
     love.graphics.setColor(255, 0, 0);
     love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
     love.graphics.reset();

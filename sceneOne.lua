@@ -1,14 +1,15 @@
 --[[
- -- First Stage/Map
+ -- Scene One
+ -- Created 10:40pm, 15th April 2014
  -- Dan
 ]]--
 
-stageOne = {}
+sceneOne = {}
 map = nil;
 overlay = nil;
 
---New
-function stageOne:new()
+-- New
+function sceneOne:new()
    local gs = {}
 
    gs = setmetatable(gs, self)
@@ -18,8 +19,8 @@ function stageOne:new()
    return gs
 end
 
---Load
-function stageOne:load()
+-- Load
+function sceneOne:load()
   -- Load Map
   map = loader.load("test.tmx");
   
@@ -27,25 +28,25 @@ function stageOne:load()
   overlay = love.graphics.newImage("Content/Images/overlay.png");
 end
 
---Close
-function stageOne:close()
+-- Close
+function sceneOne:close()
 end
 
---Enable
-function stageOne:enable()
+-- Enable
+function sceneOne:enable()
 end
 
---Disable
-function stageOne:disable()
+-- Disable
+function sceneOne:disable()
 end
 
---Update
-function stageOne:update(dt)
+-- Update
+function sceneOne:update(dt)
   playerObj:update(dt, map, global.currentGameSpeed);
 end
 
---Draw
-function stageOne:draw()
+-- Draw
+function sceneOne:draw()
     love.graphics.clear();
     
     -- Scale and translate the game screen for map drawing
@@ -75,21 +76,21 @@ function stageOne:draw()
     love.graphics.reset();
 end
 
---KeyPressed
-function stageOne:keypressed(key, unicode)
+-- KeyPressed
+function sceneOne:keypressed(key, unicode)
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
   
   playerObj:keypressed(key, unicode);
 end
 
---KeyReleased
-function stageOne:keyreleased(key, unicode)
+-- KeyReleased
+function sceneOne:keyreleased(key, unicode)
 end
 
---MousePressed
-function stageOne:mousepressed(x, y, button)
+-- MousePressed
+function sceneOne:mousepressed(x, y, button)
 end
 
---MouseReleased
-function stageOne:mousereleased(x, y, button)
+-- MouseReleased
+function sceneOne:mousereleased(x, y, button)
 end
