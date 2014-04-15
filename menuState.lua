@@ -1,6 +1,6 @@
 menuState = {}
 
---New
+-- New
 function menuState:new()
    local gs = {}
 
@@ -11,42 +11,42 @@ function menuState:new()
    return gs
 end
 
---Load
+-- Load
 function menuState:load()
 end
 
---Close
+-- Close
 function menuState:close()
 end
 
---Enable
+-- Enable
 function menuState:enable()
 end
 
---Disable
+-- Disable
 function menuState:disable()
 end
 
---Update
+-- Update
 function menuState:update(dt)
 end
 
---Draw
+-- Draw
 function menuState:draw()
 end
 
---KeyPressed
+-- KeyPressed
 function menuState:keypressed(key, unicode)
 end
 
---KeyReleased
+-- KeyReleased
 function menuState:keyreleased(key, unicode)
 end
 
---MousePressed
+-- MousePressed
 function menuState:mousepressed(x, y, button)
 end
 
---MouseReleased
+-- MouseReleased
 function menuState:mousereleased(x, y, button)
 end

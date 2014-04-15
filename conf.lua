@@ -9,7 +9,7 @@ author = "Wizardry Games";
 url = "www.wizardrygames.com";
 width = 720;
 height = 400;
-iconPath = nil;
+iconPath = "Content/Images/icon.png";
 
 function love.conf(t)
     t.identity = nil                   -- The name of the save directory (string)

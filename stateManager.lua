@@ -1,5 +1,7 @@
---LövelyMoon stateManager - slight tweaks by myself purely for my own clarity. 
---Made by Davidobot
+--[[ 
+ --LövelyMoon stateManager - slight tweaks by myself purely for my own clarity. 
+ --Made by Davidobot
+--]]
 stateManager = { states = {} }
 
 function addState( class, id )

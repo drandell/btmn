@@ -7,7 +7,7 @@
 
 debugState = {};
 
---New
+-- New
 function debugState:new()
    local gs = {}
 
@@ -18,29 +18,30 @@ function debugState:new()
    return gs
 end
 
---Load
+-- Load
 function debugState:load()
 end
 
---Close
+-- Close
 function debugState:close()
 end
 
---Enable
+-- Enable
 function debugState:enable()
 end
 
---Disable
+-- Disable
 function debugState:disable()
 end
 
---Update
+-- Update
 function debugState:update(dt)
 end
 
+-- Draw
 function debugState:draw()
   love.graphics.setFont(gameFont);
-  --love.graphics.setFont(testFont);
+
   love.graphics.printf("Using version: " .. version, 0, 0, love.window.getWidth() - 6, "right");
   love.graphics.printf("FPS: " .. tostring(love.timer.getFPS()), 0, 0, love.window.getWidth(), "left");
   
@@ -49,7 +50,7 @@ function debugState:draw()
   
   love.graphics.setNewFont(12);
   
-    -- Draw Debug
+    -- Draw Player Debug
   if (playerObj.drawDebug) then 
     love.graphics.setColor(255, 255, 0);
     love.graphics.rectangle("line", playerObj.collisionRect.x, playerObj.collisionRect.y, playerObj.collisionRect.width, playerObj.collisionRect.height);  
