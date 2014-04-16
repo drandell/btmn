@@ -56,8 +56,8 @@ function love.load( arg )
     addState(debugState, "debug");
    
     -- Enable States
-    --enableState("menu");
-    enableState("sceneOne");
+    enableState("menu");
+    --enableState("sceneOne");
     --enableState("test");
     
     ----------------------------------------------
@@ -76,13 +76,7 @@ function love.update(dt)
    if (love.keyboard.isDown("escape")) then os.exit(0); end
 end
 
-function love.draw()
-    --[[
-    love.graphics.setColor(255, 0, 0, 125);
-    love.graphics.rectangle("line", map:getDrawRange())
-    love.graphics.reset();
-    ]]--
-    
+function love.draw()    
     lovelyMoon.draw();
 end
 
