@@ -376,11 +376,14 @@ function player:draw()
     love.graphics.reset();
   end
   
+  -- UI Elements (seperate out)
+  -- Add different font for scene name, to make it look comic like.
   love.graphics.rectangle("fill", 
     global.offsetX + global.gameWorldWidth - (love.graphics.getFont():getWidth(map.properties.scene) + 5), 
     global.offsetY + global.gameWorldHeight - (love.graphics.getFont():getHeight(map.properties.scene) + 5), 
     love.graphics.getFont():getWidth(map.properties.scene), 
     love.graphics.getFont():getHeight(map.properties.scene));
+  --love.graphics.setFont(); -- TODO: Add comic font!
   love.graphics.setColor(0, 0, 0, 255); -- We want black text
   love.graphics.print("" .. map.properties.scene, 
     global.offsetX + global.gameWorldWidth - (love.graphics.getFont():getWidth(map.properties.scene) + 5),
