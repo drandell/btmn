@@ -48,4 +48,18 @@
  <objectgroup name="Messages Layer" width="40" height="10"/>
  <objectgroup name="Ropes" width="40" height="10"/>
  <objectgroup name="Npcs" width="40" height="10"/>
+ <objectgroup name="Enemies" width="40" height="10">
+  <object name="Enemy#1" type="RedHoodGang" x="576" y="256" width="32" height="32">
+   <properties>
+    <property name="direction" value="1"/>
+    <property name="health" value="100"/>
+    <property name="message" value="It's the Bat! He's real!"/>
+    <property name="nextState" value="speak"/>
+    <property name="offsetX" value="0"/>
+    <property name="offsetY" value="0"/>
+    <property name="speedX" value="2"/>
+    <property name="state" value="idle"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

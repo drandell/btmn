@@ -24,6 +24,9 @@ function sceneOne:load()
   -- Load Map
   map = loader.load("test.tmx");
   
+  -- Load Enemies
+  loadEnemies(map);
+  
   --Load Images
   overlay = love.graphics.newImage("Content/Images/overlay.png");
 end
@@ -57,7 +60,7 @@ function sceneOne:draw()
     
     -- Set the draw range 
     map:autoDrawRange(global.offsetX + ftx, global.offsetY + fty, global.scale, 50);  
-    map:setDrawRange( 0, 0 , 640 + 32 - ftx, 320 - fty);
+    map:setDrawRange( 0, 0 , global.gameWorldWidth + global.tSize - ftx, global.gameWorldHeight - fty);
     -- Draw the map
     map:draw() 
     

@@ -8,6 +8,7 @@
 require("stateManager");
 require("lovelyMoon");
 require("storyFader");
+require("mapObjects");
 
 -- Advanced Tiled Loader Library
 loader = require "./AdvTiledLoader/Loader";
@@ -39,7 +40,7 @@ require("sceneOne");
 require("joker");
 
 -- Testing Creation of Joker Villain
-joker = jokerVillian:create();
+--joker = jokerVillian:create();
 
 function love.load( arg )
     -- ZeroBrane Debug requirement

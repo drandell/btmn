@@ -4,10 +4,10 @@
  -- Dan
 ]]--
 
-require "enemy";
+require "enemies";
 
 jokerVillian = {}
-local joker_mt = { __index = enemy };
+local joker_mt = { __index = enemies };
 
 function jokerVillian:create()
   local newinst = {};
