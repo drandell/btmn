@@ -46,6 +46,8 @@ end
 -- Update
 function sceneOne:update(dt)
   playerObj:update(dt, map, global.currentGameSpeed);
+  
+  enemies[1]:update(dt, map, global.currentGameSpeed);
 end
 
 -- Draw
@@ -71,6 +73,8 @@ function sceneOne:draw()
     love.graphics.draw(overlay, 0, 0);
     
     playerObj.draw();
+    
+    enemies[1]:draw();
     
     love.graphics.setColor(255, 255, 255);
     love.graphics.setLineWidth(4);

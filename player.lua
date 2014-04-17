@@ -368,12 +368,24 @@ function player:draw()
   end
   ]]--
   
-  -- Temp Health Bar
+  -- Temp Health Bar & Map Information 
+  -- TODO: Move to a UI implementation
   for i = 0, player.health / 20 do
     love.graphics.setColor(255, 0, 0);
     love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
     love.graphics.reset();
   end
+  
+  love.graphics.rectangle("fill", 
+    global.offsetX + global.gameWorldWidth - (love.graphics.getFont():getWidth(map.properties.scene) + 5), 
+    global.offsetY + global.gameWorldHeight - (love.graphics.getFont():getHeight(map.properties.scene) + 5), 
+    love.graphics.getFont():getWidth(map.properties.scene), 
+    love.graphics.getFont():getHeight(map.properties.scene));
+  love.graphics.setColor(0, 0, 0, 255); -- We want black text
+  love.graphics.print("" .. map.properties.scene, 
+    global.offsetX + global.gameWorldWidth - (love.graphics.getFont():getWidth(map.properties.scene) + 5),
+    global.offsetY + global.gameWorldHeight - (love.graphics.getFont():getHeight(map.properties.scene) + 5));
+  love.graphics.setColor(255, 255, 255, 255); -- Reset Color
 end
 
 function player:keypressed(key, unicode)

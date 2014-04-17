@@ -5,17 +5,17 @@
 ]]--
 
 -- Libraries
-require("stateManager");
-require("lovelyMoon");
-require("storyFader");
-require("mapObjects");
+require("./Libraries/stateManager");
+require("./Libraries/lovelyMoon");
+require("./storyFader");
+require("./mapObjects");
 
 -- Advanced Tiled Loader Library
-loader = require "./AdvTiledLoader/Loader";
+loader = require("./Libraries/AdvTiledLoader/Loader");
 loader.path = "Content/Maps/";
 
 -- Anim 8 by Enrique García Cota
-anim8 = require "anim8";
+anim8 = require("./Libraries/anim8");
 
 -- Global Vars
 global = {};
@@ -25,6 +25,8 @@ global.scale = 1;                -- Scale of the screen
 global.tSize = 32;               -- Tile Size
 global.offsetX = 40;             -- Viewport Offset X
 global.offsetY = 40;             -- Viewport Offset Y
+global.viewportWidth = width;    -- Actual Window Width
+global.viewportHeight = height;  -- Actual Window Height
 global.gameWorldWidth = 640;     -- Game World Width Viewport
 global.gameWorldHeight = 320;    -- Game World Height Viewport
 global.currentGameSpeed = 1;     -- Game World Speed 
