@@ -31,18 +31,18 @@ global.gameWorldWidth = 640;     -- Game World Width Viewport
 global.gameWorldHeight = 320;    -- Game World Height Viewport
 global.currentGameSpeed = 1;     -- Game World Speed 
 
--- Player
-playerObj = require "player";
+-- Btmn
+btmn = require "btmn";
 
 -- States
 require("debugState");
 --require("testState");
 require("menuState");
 require("sceneOne");
-require("joker");
+require("jkr");
 
--- Testing Creation of Joker Villain
---joker = jokerVillian:create();
+-- Testing Creation of Jkr Villain
+--jkr = jkrVillian:create();
 
 function love.load( arg )
     -- ZeroBrane Debug requirement
@@ -59,14 +59,14 @@ function love.load( arg )
     addState(debugState, "debug");
    
     -- Enable States
-    enableState("menu");
-    --enableState("sceneOne");
+    --enableState("menu");
+    enableState("sceneOne");
     --enableState("test");
     
     ----------------------------------------------
     -- Debug
-    playerObj.x = 0;
-    playerObj.y = 0;
+    btmn.x = 0;
+    btmn.y = 0;
     global.tx = 0;
    
     -- Load Global Resources such as Fonts
@@ -87,7 +87,7 @@ function love.keypressed(key, unicode)
    lovelyMoon.keypressed(key, unicode);
    
    -- Enable Debug Drawing
-   if (key == "f1") then toggleState("debug"); playerObj.drawDebug = not playerObj.drawDebug; end
+   if (key == "f1") then toggleState("debug"); btmn.drawDebug = not btmn.drawDebug; end
 end
 
 function love.keyreleased(key, unicode)

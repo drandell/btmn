@@ -45,9 +45,13 @@ end
 
 -- Update
 function sceneOne:update(dt)
-  playerObj:update(dt, map, global.currentGameSpeed);
+  -- Update BTMN
+  btmn:update(dt, map, global.currentGameSpeed);
   
-  enemies[1]:update(dt, map, global.currentGameSpeed);
+  -- Update Enemies
+  for i, enemy in pairs( enemies ) do
+      enemy:update(dt, map, global.currentGameSpeed);
+    end
 end
 
 -- Draw
@@ -69,13 +73,19 @@ function sceneOne:draw()
     -- Reset the scale and translation
     love.graphics.pop()   
     
+    -- Draw Enemies
+    for i, enemy in pairs( enemies ) do
+      enemy:draw();
+    end
+    
     -- Draw overlay
     love.graphics.draw(overlay, 0, 0);
     
-    playerObj.draw();
+    -- Draw BTMN
+    btmn.draw();
     
-    enemies[1]:draw();
-    
+    -- Draw UI Border 
+    -- TODO: Move to UI implementation
     love.graphics.setColor(255, 255, 255);
     love.graphics.setLineWidth(4);
     love.graphics.rectangle("line", global.offsetX, global.offsetY, global.gameWorldWidth, global.gameWorldHeight);  
@@ -87,7 +97,7 @@ end
 function sceneOne:keypressed(key, unicode)
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
   
-  playerObj:keypressed(key, unicode);
+  btmn:keypressed(key, unicode);
 end
 
 -- KeyReleased

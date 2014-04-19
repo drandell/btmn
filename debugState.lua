@@ -46,14 +46,14 @@ function debugState:draw()
   love.graphics.printf("FPS: " .. tostring(love.timer.getFPS()), 0, 0, love.window.getWidth(), "left");
   
   love.graphics.print("Scroll X: " .. global.tx, 6, 280);
-  love.graphics.print("X: " .. playerObj.x, 6, 300);
+  love.graphics.print("X: " .. btmn.x, 6, 300);
   
   love.graphics.setNewFont(12);
   
     -- Draw Player Debug
-  if (playerObj.drawDebug) then 
+  if (btmn.drawDebug) then 
     love.graphics.setColor(255, 255, 0);
-    love.graphics.rectangle("line", playerObj.collisionRect.x, playerObj.collisionRect.y, playerObj.collisionRect.width, playerObj.collisionRect.height);  
+    love.graphics.rectangle("line", btmn.collisionRect.x, btmn.collisionRect.y, btmn.collisionRect.width, btmn.collisionRect.height);  
     love.graphics.reset();
   end
 end

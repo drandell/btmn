@@ -1,4 +1,4 @@
-btmn
+BTMN
 ====
 
 Batman Fan Project created by Wizardry Games (Daniel Randell & John Riselvato)

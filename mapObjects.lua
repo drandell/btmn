@@ -5,7 +5,6 @@
  -- Dan
 ]]--
 
-
 function loadEnemies(map)
   local redHoodImg = love.graphics.newImage("Content/Images/testEnemy.png");
   
@@ -14,12 +13,11 @@ function loadEnemies(map)
       -- Add Enemy
       for i, obj in pairs( map("Enemies").objects ) do
         enemies[i] = enemy(obj.x, obj.y, obj.width, obj.height, obj.properties.speedX, obj.type,
-          obj.properties.state, obj.properties.state, obj.properties.message, obj.properties.offsetX, obj.properties.offsetY);
+          obj.properties.state, obj.properties.nextState, obj.properties.message, obj.properties.offsetX, obj.properties.offsetY);
         
         if (string.lower(enemies[i].typeOf) == "redhoodgang") then
           enemies[i].img = redHoodImg;
         end
-            
     end
   end
 end

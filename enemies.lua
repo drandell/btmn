@@ -39,9 +39,25 @@ enemy = class(function(enemy,x,y,width,height,speedX, typeOf, state, nxtState, m
          
 function enemy:update(dt, colmap, gameSpeed)
   gameSpeed = gameSpeed or 1;
+  -- TODO: Each enemy should have an individual range, but generic thugs 
+  -- Will probably all have the same 
+  local RANGE = 250;
   
   if (self.state == "idle") then
     -- enemies is standing around
+    if (self.x > btmn.x and btmn.x + btmn.width + RANGE > self.x or
+        self.x < btmn.x and btmn.x - RANGE < self.x) then
+      if (self.nxtState ~= nil) then
+        self.state = self.nxtState;
+      else
+        self.state = "actioned";
+      end
+    end
+  
+  elseif (self.state == "speak") then
+    -- Enemy has something to say
+    global.currentGameSpeed = 0; -- STOP THE PRESS!
+    
   elseif (self.state == "patrol") then
     -- Patrol area
   elseif (self.state == "actioned") then
@@ -60,18 +76,44 @@ function enemy:update(dt, colmap, gameSpeed)
 end
 
 function enemy:draw()
-  love.graphics.draw(self.img, 
-    self.x + global.tx + global.offsetX, 
-    self.y + global.offsetY + global.ty, 
-    0, 
-    1, 
-    1);
-  
-  -- Debug; Draw State Text
-  love.graphics.setColor(255, 255, 255, 255); 
-  love.graphics.print(
-    "State: " .. self.state, 
-    self.x - 16 + global.tx + global.offsetX, 
-    self.y - 16 + global.offsetY +  global.ty
-  );
+  if (self.state ~= "speak") then 
+    if (self.x + self.width + global.tx > 0) then 
+      love.graphics.draw(self.img, 
+        self.x + global.tx + global.offsetX, 
+        self.y + global.offsetY + global.ty, 
+        0, 
+        1, 
+        1);
+      
+      -- Debug; Draw State Text
+      love.graphics.setColor(255, 255, 255, 255); 
+      love.graphics.print(
+        "State: " .. self.state, 
+        self.x - 16 + global.tx + global.offsetX, 
+        self.y - 16 + global.offsetY +  global.ty
+      );
+    end
+  else
+    love.graphics.draw(self.img, 
+        self.x + global.tx + global.offsetX, 
+        self.y + global.offsetY + global.ty, 
+        0, 
+        1, 
+        1);
+    
+    love.graphics.setColor(255, 255, 255, 255); 
+    -- TODO: Edit this properly later to show the message
+    local numOfLines = (love.graphics.getFont():getWidth(self.message) / 100);
+    local heightOffset = (love.graphics.getFont():getHeight(self.message) * (numOfLines + 1));
+    love.graphics.print(
+        "State: " .. self.state, 
+        self.x - 18 + global.tx + global.offsetX, 
+        self.y - 16 - heightOffset + global.offsetY +  global.ty
+      );
+    love.graphics.printf(
+        "" .. self.message, 
+        self.x - 18 + global.tx + global.offsetX, 
+        self.y - heightOffset + global.offsetY +  global.ty, 100, "left"
+    );
+  end
 end
