@@ -59,8 +59,8 @@ function love.load( arg )
     addState(debugState, "debug");
    
     -- Enable States
-    --enableState("menu");
-    enableState("sceneOne");
+    enableState("menu");
+    --enableState("sceneOne");
     --enableState("test");
     
     ----------------------------------------------

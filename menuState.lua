@@ -1,4 +1,5 @@
 menuState = {}
+menuState.logo = nil;
 menuState.options = { 
   {text = "Play Episode #1", implemented = true, gotoState = "sceneOne"}, 
   {text = "Options", implemented = false, gotoState = "options"} 
@@ -19,6 +20,8 @@ end
 
 -- Load
 function menuState:load()
+  -- Load Logo
+  menuState.logo = love.graphics.newImage("Content/Images/logo.png");
 end
 
 -- Close
@@ -47,18 +50,21 @@ end
 function menuState:draw()
   love.graphics.clear();
   
+  love.graphics.setBackgroundColor(255, 255, 255, 255);
+  love.graphics.draw(menuState.logo, (global.viewportWidth - menuState.logo:getWidth()) / 2, 30);
+  
   for i = 1, menuState.numberOfOptions do
     if (menuState.options[i].implemented) then 
       
       if (i ~= menuState.currentSelectedOption) then
         love.graphics.setColor(255, 255, 255, 255); 
       else
-        love.graphics.setColor(255, 255, 0, 255); 
+        love.graphics.setColor(0, 255, 0, 255); 
       end
-      love.graphics.printf(menuState.options[i].text, 310, 330 + (i * 20), 120, nil);
+      love.graphics.print(menuState.options[i].text, 310, 330 + (i * 20));
     else 
       love.graphics.setColor(255, 0, 0, 255); 
-      love.graphics.printf(menuState.options[i].text .. " (Not Implemented)", 310, 330 + (i * 20), 400, nil);
+      love.graphics.print(menuState.options[i].text .. " (Not Implemented)", 280, 330 + (i * 20));
     end
   end
 
