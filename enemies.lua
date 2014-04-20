@@ -45,9 +45,10 @@ function enemy:update(dt, colmap, gameSpeed)
   -- TODO: Each enemy should have an individual range, but generic thugs 
   -- Will probably all have the same 
   local RANGE = 250;
+  local FIGHT_DISTANCE = 15;
   
   if (self.state == "idle") then
-    -- enemies is standing around
+    -- Enemy is standing around
     if (self.x > btmn.x and btmn.x + btmn.width + RANGE > self.x or
         self.x < btmn.x and btmn.x - RANGE < self.x) then
       if (self.nxtState ~= nil) then
@@ -80,12 +81,20 @@ function enemy:update(dt, colmap, gameSpeed)
     -- Patrol area
   elseif (self.state == "actioned") then
     -- Enemies is actioned, ready to fight
+    if (self.x > btmn.x and btmn.x + btmn.width + FIGHT_DISTANCE < self.x) then
+      self.x = self.x - self.speedX;
+    elseif (self.x < btmn.x and btmn.x - FIGHT_DISTANCE > self.x + self.width) then
+      self.x = self.x + self.speedX;
+    end
+      
   elseif (self.state == "punch") then
     -- Fighting Batman
   elseif (self.state == "kick") then
     -- Fighting Batman
+  elseif (self.state == "stunned") then
+    --Enemy has been stunned
   elseif (self.state == "knockout") then
-    -- Enemies has been defeated
+    -- Enemy has been defeated
   end
   
   -- Update Collision Rectangle
