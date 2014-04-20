@@ -7,6 +7,7 @@
 -- Libraries
 require("./Libraries/stateManager");
 require("./Libraries/lovelyMoon");
+require("./Libraries/colors");
 require("./storyFader");
 require("./mapObjects");
 

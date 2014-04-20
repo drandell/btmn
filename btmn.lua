@@ -356,9 +356,13 @@ end
 function btmn:draw()
   -- Draw btmn  
   if (btmn.standingRight or btmn.movingRight) then
-    love.graphics.draw(btmn.img, btmn.x + global.tx + 40, btmn.y + 40 + global.ty, 0, 1, 1);
+    love.graphics.draw(btmn.img, 
+      btmn.x + global.tx + global.offsetX, 
+      btmn.y + global.ty + global.offsetY, 0, 1, 1);
   elseif (btmn.standingLeft or btmn.movingLeft) then
-    love.graphics.draw(btmn.img, btmn.x + global.tx + 40, btmn.y + 40 + global.ty, 0, -1, 1, btmn.width + (offset.x * 2));
+    love.graphics.draw(btmn.img, 
+      btmn.x + global.tx + global.offsetX, 
+      btmn.y + global.ty + global.offsetY, 0, -1, 1, btmn.width + (offset.x * 2));
   end
   --[[
   if (btmn.movingRight) then
@@ -371,7 +375,7 @@ function btmn:draw()
   -- Temp Health Bar & Map Information 
   -- TODO: Move to a UI implementation
   for i = 0, btmn.health / 20 do
-    love.graphics.setColor(255, 0, 0);
+    love.graphics.setColor(red);
     love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
     love.graphics.reset();
   end
@@ -384,11 +388,11 @@ function btmn:draw()
     love.graphics.getFont():getWidth(map.properties.scene), 
     love.graphics.getFont():getHeight(map.properties.scene));
   --love.graphics.setFont(); -- TODO: Add comic font!
-  love.graphics.setColor(0, 0, 0, 255); -- We want black text
+  love.graphics.setColor(black); -- We want black text
   love.graphics.print("" .. map.properties.scene, 
     global.offsetX + global.gameWorldWidth - (love.graphics.getFont():getWidth(map.properties.scene) + 5),
     global.offsetY + global.gameWorldHeight - (love.graphics.getFont():getHeight(map.properties.scene) + 5));
-  love.graphics.setColor(255, 255, 255, 255); -- Reset Color
+  love.graphics.setColor(white); -- Reset Color
 end
 
 function btmn:keypressed(key, unicode)

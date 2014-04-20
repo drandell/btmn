@@ -1,5 +1,6 @@
 menuState = {}
 menuState.logo = nil;
+menuState.logoPos = { x = 0, y = 0 };
 menuState.options = { 
   {text = "Play Episode #1", implemented = true, gotoState = "sceneOne"}, 
   {text = "Options", implemented = false, gotoState = "options"} 
@@ -22,6 +23,7 @@ end
 function menuState:load()
   -- Load Logo
   menuState.logo = love.graphics.newImage("Content/Images/logo.png");
+  menuState.logoPos = {x = (global.viewportWidth - menuState.logo:getWidth()) / 2, y = 30 };
 end
 
 -- Close
@@ -50,21 +52,35 @@ end
 function menuState:draw()
   love.graphics.clear();
   
-  love.graphics.setBackgroundColor(255, 255, 255, 255);
-  love.graphics.draw(menuState.logo, (global.viewportWidth - menuState.logo:getWidth()) / 2, 30);
+  love.graphics.setBackgroundColor(white);
+  love.graphics.draw(menuState.logo, menuState.logoPos.x, menuState.logoPos.y);
   
   for i = 1, menuState.numberOfOptions do
+    -- Locals, to justify Y coord of menu text
+    local startY = 330;
+    local yIncrement = 20;
+    
     if (menuState.options[i].implemented) then 
       
       if (i ~= menuState.currentSelectedOption) then
-        love.graphics.setColor(255, 255, 255, 255); 
+        love.graphics.setColor(white); 
       else
-        love.graphics.setColor(0, 255, 0, 255); 
+        love.graphics.setColor(green); 
       end
-      love.graphics.print(menuState.options[i].text, 310, 330 + (i * 20));
+      local textWidthInPixels = love.graphics.getFont():getWidth(menuState.options[i].text);
+      love.graphics.print(
+        menuState.options[i].text, 
+        menuState.logoPos.x + (menuState.logo:getWidth() / 2) - (textWidthInPixels / 2), 
+        startY + (i * yIncrement)
+        );
     else 
-      love.graphics.setColor(255, 0, 0, 255); 
-      love.graphics.print(menuState.options[i].text .. " (Not Implemented)", 280, 330 + (i * 20));
+      love.graphics.setColor(red); 
+      local textWidthInPixels = love.graphics.getFont():getWidth(menuState.options[i].text .. " (Not Implemented)");
+      love.graphics.print(
+        menuState.options[i].text .. " (Not Implemented)", 
+        menuState.logoPos.x + (menuState.logo:getWidth() / 2) - (textWidthInPixels / 2), 
+        startY + (i * yIncrement)
+        );
     end
   end
 
