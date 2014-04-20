@@ -28,6 +28,9 @@ enemy = class(function(enemy,x,y,width,height,speedX, typeOf, state, nxtState, m
               enemy.state = state;
               enemy.nxtState = nxtState;
               enemy.message = msg;
+              enemy.dly = 500;
+              enemy.oldDly = 500;
+              enemy.alpha = 255;
               enemy.offset = {x = offsetX, y = offsetY};
               enemy.collisionRect = {
                 x = (x + offsetX) - global.tx;
@@ -57,6 +60,21 @@ function enemy:update(dt, colmap, gameSpeed)
   elseif (self.state == "speak") then
     -- Enemy has something to say
     global.currentGameSpeed = 0; -- STOP THE PRESS!
+    local delta = (love.timer.getAverageDelta() * 1000);
+    self.dly = self.dly - delta;
+    
+    -- Either a) have a timer delay and then re-begin action automatically
+    -- or b) let player press button to resume action.
+    -- future; What if the enemy has a LOT to say?
+    if (self.dly < 0) then
+      global.currentGameSpeed = 1;
+      self.alpha = self.alpha - 10;
+      
+      if (self.alpha < 0) then
+        self.state = "actioned";
+        self.dly = self.oldDly;
+      end
+    end
     
   elseif (self.state == "patrol") then
     -- Patrol area
@@ -101,7 +119,7 @@ function enemy:draw()
         1, 
         1);
     
-    love.graphics.setColor(255, 255, 255, 255); 
+    love.graphics.setColor(255, 255, 255, self.alpha); 
     -- TODO: Edit this properly later to show the message
     local numOfLines = (love.graphics.getFont():getWidth(self.message) / 100);
     local heightOffset = (love.graphics.getFont():getHeight(self.message) * (numOfLines + 1));
@@ -115,5 +133,6 @@ function enemy:draw()
         self.x - 18 + global.tx + global.offsetX, 
         self.y - heightOffset + global.offsetY +  global.ty, 100, "left"
     );
+    love.graphics.reset();
   end
 end
