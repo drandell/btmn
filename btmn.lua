@@ -23,11 +23,9 @@ btmn.health = 100;
 btmn.drawDebug = false;
 
 -- Character Action Bools
+btmn.currentState = "standing";
+btmn.currentAnim = nil;
 btmn.canMove = true;
-btmn.standingLeft = false;
-btmn.standingRight = true;
-btmn.movingLeft = false;
-btmn.movingRight = false;
 btmn.jumping = false;
 
 -- Rope Bools
@@ -251,11 +249,7 @@ function btmn:update(dt, colmap, gameSpeed)
   
   -- Update Anim
   --[[
-  if (btmn.movingRight) then
-    btmn.walkRight:update(dt);
-  elseif (btmn.movingLeft) then
-    btmn.walkRight:update(dt);
-  end
+    btmn.currentAnim:update(dt);
   ]]--
   
   -- Check to see if the object should be falling
@@ -268,39 +262,41 @@ function btmn:update(dt, colmap, gameSpeed)
     if (love.keyboard.isDown("right")) then 
         btmn.direction = RIGHT;
         movebtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed);  
-        btmn.movingLeft = false;
-        btmn.movingRight = true;
-        btmn.standingRight = false;
-        btmn.standingLeft = false;
+        btmn.currentState = "movingRight";
+        --btmn.currentAnim = btmn.walkRight;
     end
   
     if (love.keyboard.isDown("left")) then 
         btmn.direction = LEFT;
         movebtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-        btmn.movingRight = false;
-        btmn.movingLeft = true;
-        btmn.standingRight = false;
-        btmn.standingLeft = false;
+        btmn.currentState = "movingLeft";
+        --btmn.currentAnim = btmn.walkLeft;
     end
     
-    -- ADD Jumping check here for when jumping to-do anim
     if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
-      btmn.movingLeft = false;
-      btmn.movingRight = false;
-      
       if (btmn.direction == RIGHT) then
-        btmn.standingRight = true;
+        btmn.currentState = "standingRight";
+        --btmn.currentAnim = btmn.standRight;
       else
-        btmn.standingLeft = true;
+        btmn.currentState = "standingLeft";
+        --btmn.currentAnim = btmn.standLeft;
       end
     end
  
     if (btmn.jumping) then
         jump(colmap("Collision Layer"), gameSpeed);
+        
+        --if (btmn.direction == RIGHT) then
+        --btmn.currentAnim = btmn.jumpRight;
+        --elseif (btmn.direction == LEFT) then
+        --btmn.currentAnim = btmn.jumpLeft;
+        --end       
     end
   elseif btmn.onRope then
     -- Check to see if btmn can climb &
     -- Check to see if btmn can exit rope!
+    --btmn.currentAnim = btmn.climb;
+    
     if (love.keyboard.isDown("up") and canMoveUpRope()) then
       btmn.y = btmn.y - 2;
     elseif not canMoveUpRope() then
@@ -355,11 +351,11 @@ end
 
 function btmn:draw()
   -- Draw btmn  
-  if (btmn.standingRight or btmn.movingRight) then
+  if (btmn.currentState == "standingRight" or btmn.currentState == "movingRight") then
     love.graphics.draw(btmn.img, 
       btmn.x + global.tx + global.offsetX, 
       btmn.y + global.ty + global.offsetY, 0, 1, 1);
-  elseif (btmn.standingLeft or btmn.movingLeft) then
+  elseif (btmn.currentState == "standingLeft" or btmn.currentState == "movingLeft") then
     love.graphics.draw(btmn.img, 
       btmn.x + global.tx + global.offsetX, 
       btmn.y + global.ty + global.offsetY, 0, -1, 1, btmn.width + (offset.x * 2));
