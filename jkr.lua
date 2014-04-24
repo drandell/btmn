@@ -7,7 +7,7 @@
 require "enemies";
 
 jkrVillian = {}
-local joker_mt = { __index = enemies };
+local joker_mt = { __index = enemy };
 
 function jkrVillian:create()
   local newinst = {};
@@ -15,7 +15,7 @@ function jkrVillian:create()
   return newinst;
 end
 
-function jkrVillian:update(dt, colmap, gameSpeed)
+function jkrVillian:update( dt, colmap, gameSpeed )
   enemy:update(dt, colmap, gameSpeed);
 end
 

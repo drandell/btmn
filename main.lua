@@ -1,5 +1,5 @@
 --[[
- -- Main Lua File
+ -- Main lua file
  -- Created in a galaxy far, far away.. in 2014
  -- Dan
 ]]--
@@ -18,7 +18,7 @@ loader.path = "Content/Maps/";
 -- Anim 8 by Enrique García Cota
 anim8 = require("./Libraries/anim8");
 
--- Global Vars
+-- Global vars
 global = {};
 global.tx = 0;                   -- X translation of the screen
 global.ty = 0;                   -- Y translation of the screen
@@ -43,9 +43,10 @@ require("menuOptionsState");
 require("sceneOne");
 require("jkr");
 
--- Testing Creation of Jkr Villain
+-- Testing creation of Jkr villain
 --jkr = jkrVillian:create();
 
+-- Load
 function love.load( arg )
     -- ZeroBrane Debug requirement
     if arg[#arg] == "-debug" then require("mobdebug").start(); end
@@ -75,18 +76,18 @@ function love.load( arg )
     -- Load Global Resources such as Fonts
     gameFont = love.graphics.newFont("/Content/MunroSmall.ttf", 14);
 end
-
-function love.update(dt)
+-- Update
+function love.update( dt )
    lovelyMoon.update(dt);
    
    if (love.keyboard.isDown("escape")) then os.exit(0); end
 end
-
+-- Draw
 function love.draw()    
     lovelyMoon.draw();
 end
-
-function love.keypressed(key, unicode)
+-- Key pressed
+function love.keypressed( key, unicode )
    lovelyMoon.keypressed(key, unicode);
    
    -- Enable Debug Drawing
@@ -95,15 +96,15 @@ function love.keypressed(key, unicode)
      btmn.drawDebug = not btmn.drawDebug; 
    end
 end
-
-function love.keyreleased(key, unicode)
+-- Key released
+function love.keyreleased( key, unicode )
    lovelyMoon.keyreleased(key, unicode);
 end
-
-function love.mousepressed(x, y, button)
+-- Mouse pressed
+function love.mousepressed( x, y, button )
    lovelyMoon.mousepressed(x, y, button);
 end
-
-function love.mousereleased(x, y, button)
+-- Mouse released
+function love.mousereleased( x, y, button )
    lovelyMoon.mousereleased(x, y, button);
 end

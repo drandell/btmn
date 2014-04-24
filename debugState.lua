@@ -17,27 +17,22 @@ function debugState:new()
    
    return gs
 end
-
 -- Load
 function debugState:load()
 end
-
 -- Close
 function debugState:close()
 end
-
 -- Enable
 function debugState:enable()
 end
-
 -- Disable
 function debugState:disable()
 end
 
 -- Update
-function debugState:update(dt)
+function debugState:update( dt )
 end
-
 -- Draw
 function debugState:draw()
   love.graphics.setFont(gameFont);

@@ -1,3 +1,10 @@
+--[[
+ -- Menu options state
+ -- Handles game options available in main menu
+ -- Made Afternoon, April 23rd 2014
+ -- Dan
+]]--
+
 menuOptionsState = {}
 menuOptionsState.logo = nil;
 menuOptionsState.logoPos = { x = 0, y = 0 };
@@ -41,7 +48,7 @@ function menuOptionsState:disable()
 end
 
 -- Update
-function menuOptionsState:update(dt)
+function menuOptionsState:update( dt )
   -- Options Selection
   if (menuOptionsState.currentSelectedOption > menuOptionsState.numberOfOptions) then
     menuOptionsState.currentSelectedOption = 1;
@@ -89,7 +96,7 @@ function menuOptionsState:draw()
 end
 
 -- KeyPressed
-function menuOptionsState:keypressed(key, unicode)
+function menuOptionsState:keypressed( key, unicode )
   if (key == "up") then 
     if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1] ~= nil) then
       if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1].implemented) then
@@ -115,16 +122,16 @@ function menuOptionsState:keypressed(key, unicode)
 end
 
 -- KeyReleased
-function menuOptionsState:keyreleased(key, unicode)
+function menuOptionsState:keyreleased( key, unicode )
   if (key == "return") then
     menuOptionsState.canChoose = true;
   end
 end
 
 -- MousePressed
-function menuOptionsState:mousepressed(x, y, button)
+function menuOptionsState:mousepressed( x, y, button )
 end
 
 -- MouseReleased
-function menuOptionsState:mousereleased(x, y, button)
+function menuOptionsState:mousereleased( x, y, button )
 end

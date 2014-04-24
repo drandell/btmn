@@ -1,5 +1,5 @@
 --[[
- -- Scene One
+ -- Scene One state
  -- Created 10:40pm, 15th April 2014
  -- Dan
 ]]--
@@ -44,7 +44,7 @@ function sceneOne:disable()
 end
 
 -- Update
-function sceneOne:update(dt)
+function sceneOne:update( dt )
   -- Update BTMN
   btmn:update(dt, map, global.currentGameSpeed);
   
@@ -95,20 +95,20 @@ function sceneOne:draw()
 end
 
 -- KeyPressed
-function sceneOne:keypressed(key, unicode)
+function sceneOne:keypressed( key, unicode )
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
   
   btmn:keypressed(key, unicode);
 end
 
 -- KeyReleased
-function sceneOne:keyreleased(key, unicode)
+function sceneOne:keyreleased( key, unicode )
 end
 
 -- MousePressed
-function sceneOne:mousepressed(x, y, button)
+function sceneOne:mousepressed( x, y, button )
 end
 
 -- MouseReleased
-function sceneOne:mousereleased(x, y, button)
+function sceneOne:mousereleased( x, y, button )
 end

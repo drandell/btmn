@@ -1,5 +1,5 @@
 --[[
- -- Btmn Base Class
+ -- Btmn base class
  -- Handles all btmn actions, animations etc.
  -- Created 10th April 2014
  -- Dan
@@ -28,17 +28,17 @@ btmn.batarangImg = love.graphics.newImage("Content/Images/batarang.png");
 btmn.activeBatarangs = 0;
 btmn.maxNumberOfBatarangs = 1;
 
--- Character Action Bools
+-- Character action bools
 btmn.currentState = "standing";
 btmn.currentAnim = nil;
 btmn.canMove = true;
 btmn.jumping = false;
 
--- Rope Bools
+-- Rope bools
 btmn.collidingWithRope = false;
 btmn.onRope = false;
 
--- Conversation Bools & Vars
+-- Conversation bools & vars
 btmn.convoActive = false;
 btmn.convoInput = false;
 btmn.selectedConvoOption = 0;
@@ -46,10 +46,10 @@ btmn.selectedConvoOption = 0;
 offset = {x = 0, y = 0};
 btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width,                    height = btmn.height };
 
--- Rope Object
+-- Rope object
 rope = {}
 
--- Collision Tile Variables
+-- Collision tile variables
 left = 0;
 right = 0;
 up = 0;
@@ -67,16 +67,18 @@ btmn.walkLeft = anim8.newAnimation(walkGrid('8-1',1), 0.1):flipH();
 walkWidthOffset = 8; -- 8 pixel offset due to difference in anim frame width & btmn width
 ]]--
 
--- Simple Generic box collision function
-function boxCollision(x, y, width, height)
+--[[ Local Function ]]--
+-- Bounding box collision
+function boxCollision( x, y, width, height )
 	if (btmn.collisionRect.x + btmn.width > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
 		return true;
 	else
 		return false;
 	end
 end
-
-function boxCollisionHalfWidth(x, y, width, height)
+--[[ Local Function ]]--
+-- Half width bounding box collision detection
+function boxCollisionHalfWidth( x, y, width, height )
   if (btmn.direction == RIGHT) then
       if (btmn.collisionRect.x + (btmn.width / 2) > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y +         btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
         return true;
@@ -92,8 +94,9 @@ function boxCollisionHalfWidth(x, y, width, height)
     end
   end  
 end
-
-function getbtmnCorners(x, y)
+--[[ Local Function ]]--
+-- Get btmn corners on tilemap
+function getBtmnCorners( x, y )
   down = math.floor(( (y - offset.y) + btmn.height - 1) / global.tSize);
 	up = math.floor( (y - offset.y) / global.tSize); --+1
   
@@ -104,26 +107,26 @@ function getbtmnCorners(x, y)
   left = math.floor( (x - offset.x) / global.tSize) + 1;
 	right = math.ceil(( (x - offset.x) + btmn.width - 1) / global.tSize);
 end
-
--- Jump function, makes our btmn jump
-function jump(colMap, gSpeed, grav)
+--[[ Local Function ]]--
+-- Jump function, makes btmn jump
+function jump( colMap, gSpeed, grav )
 grav = 0.45 or grav;
 collisionMap = colMap;
 btmn.speedY = (btmn.speedY - grav * gSpeed);
 
 	if (btmn.speedY < 0) then
-		movebtmn(0, 1, collisionMap, gSpeed);
+		moveBtmn(0, 1, collisionMap, gSpeed);
 	elseif (btmn.speedY > 0) then
-		movebtmn(0, -1, collisionMap, gSpeed);
+		moveBtmn(0, -1, collisionMap, gSpeed);
 	end
 end
-
--- Fall function, to make the btmn "fall"
-function fall(collisionMap, fallSpeed)
+--[[ Local Function ]]--
+-- Fall function, to make btmn "fall"
+function fall( collisionMap, fallSpeed )
 fallSpeed = -0.5 or fallSpeed;
 
   if not btmn.jumping and not btmn.onRope then
-    getbtmnCorners(btmn.x, btmn.y + 1);
+    getBtmnCorners(btmn.x, btmn.y + 1);
       if (collisionMap:get(left, down) == nil and collisionMap:get(right, down) == nil) 
          and collisionMap:get(middleX, down) == nil then
         btmn.speedY = fallSpeed;
@@ -131,8 +134,9 @@ fallSpeed = -0.5 or fallSpeed;
       end
   end
 end
-
-function movebtmn(dirx, diry, collisionMap, gSpeed)
+--[[ Local Function ]]--
+-- Move btmn
+function moveBtmn( dirx, diry, collisionMap, gSpeed )
   --Update postition
   if not btmn.dead and btmn.x >= 0 and btmn.y >= 0 and btmn.y < global.gameWorldHeight then
     btmn.x = (btmn.x + (btmn.speedX * dirx) * gSpeed);
@@ -148,7 +152,7 @@ function movebtmn(dirx, diry, collisionMap, gSpeed)
     end
   
     -- Get btmn Tile Corners
-    getbtmnCorners(btmn.x, btmn.y);
+    getBtmnCorners(btmn.x, btmn.y);
   
     if (dirx == 1) then
         if (collisionMap:get(right, down) == nil 
@@ -195,8 +199,9 @@ function movebtmn(dirx, diry, collisionMap, gSpeed)
     
   end
 end
-
-function checkCollisionWithRope(colmap)
+--[[ Local Function ]]--
+-- Is btmn colliding with a rope?
+function checkCollisionWithRope( colmap )
   if (colmap("Ropes")) then
       for i, obj in pairs( colmap("Ropes").objects ) do
           if (boxCollisionHalfWidth(obj.drawInfo.left + global.tx, obj.drawInfo.top + global.ty, obj.width, obj.height)) then
@@ -209,7 +214,8 @@ function checkCollisionWithRope(colmap)
       end
   end
 end
-
+--[[ Local Function ]]--
+-- Is btmn at the top of a rope?
 function AtTopOfRope()
     if (btmn.collidingWithRope) then 
       if (btmn.collisionRect.y <= rope.drawInfo.top) then
@@ -221,7 +227,8 @@ function AtTopOfRope()
       return false;
     end
 end
-
+--[[ Local Function ]]--
+-- Is btmn at the bottom of a rope?
 function AtBottomOfRope()
     if (btmn.collidingWithRope) then 
       if (btmn.collisionRect.y + btmn.collisionRect.height >= rope.drawInfo.bottom) then
@@ -233,7 +240,8 @@ function AtBottomOfRope()
       return false;
     end
 end
-
+--[[ Function ]]--
+-- Can btmn move up rope?
 function canMoveUpRope()
   if (btmn.collisionRect.y <= rope.drawInfo.top) then
     return false;
@@ -241,7 +249,8 @@ function canMoveUpRope()
     return true;
   end
 end
-
+--[[ Local Function ]]--
+-- Can btmn move down rope?
 function canMoveDownRope()
   if (btmn.collisionRect.y + btmn.collisionRect.height >= rope.drawInfo.bottom) then
     return false;
@@ -249,8 +258,9 @@ function canMoveDownRope()
     return true;
   end
 end
-
-function btmn:update(dt, colmap, gameSpeed)
+--[[ Function ]]--
+-- Update
+function btmn:update( dt, colmap, gameSpeed )
   gameSpeed = gameSpeed or 1;
   
   -- Update Anim
@@ -267,14 +277,14 @@ function btmn:update(dt, colmap, gameSpeed)
   if not btmn.onRope and btmn.canMove then
     if (love.keyboard.isDown("right")) then 
         btmn.direction = RIGHT;
-        movebtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed);  
+        moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed);  
         btmn.currentState = "movingRight";
         --btmn.currentAnim = btmn.walkRight;
     end
   
     if (love.keyboard.isDown("left")) then 
         btmn.direction = LEFT;
-        movebtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+        moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
         btmn.currentState = "movingLeft";
         --btmn.currentAnim = btmn.walkLeft;
     end
@@ -354,8 +364,9 @@ function btmn:update(dt, colmap, gameSpeed)
   btmn.collisionRect.x = (btmn.x + offset.x) + global.offsetX + global.tx;
   btmn.collisionRect.y = (btmn.y - offset.y) + global.offsetY + global.ty;
 end
-
-function btmn:updateBatarangs( enemy , gameSpeed)
+--[[ Function ]]--
+-- Update batarangs
+function btmn:updateBatarangs( enemy , gameSpeed )
   gameSpeed = gameSpeed or 1;
   local BATARANG_SPD = 4;
   local BATARANG_DMG = 20;
@@ -402,7 +413,8 @@ function btmn:updateBatarangs( enemy , gameSpeed)
     end
   end
 end
-
+--[[ Function ]]--
+-- Draw
 function btmn:draw()
   -- Draw btmn  
   if (btmn.currentState == "standingRight" or btmn.currentState == "movingRight") then
@@ -454,7 +466,9 @@ function btmn:draw()
   love.graphics.setColor(white); -- Reset Color
 end
 
-function btmn:keypressed(key, unicode)
+--[[ Function ]]--
+-- Key pressed
+function btmn:keypressed( key, unicode )
   if btmn.collidingWithRope and not btmn.convoActive then
     if (key == "up") and not AtTopOfRope() or (key == "down") and not AtBottomOfRope() then
         btmn.onRope = true;
@@ -511,6 +525,7 @@ function btmn:keypressed(key, unicode)
     end
   end
 end
+
 
 
 return btmn;

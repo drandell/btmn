@@ -1,3 +1,10 @@
+--[[
+ -- Menu state
+ -- Main menu
+ -- Made about a week ago so roughly April 17th, 2014
+ -- Dan
+]]--
+
 menuState = {}
 menuState.logo = nil;
 menuState.logoPos = { x = 0, y = 0 };
@@ -40,7 +47,7 @@ function menuState:disable()
 end
 
 -- Update
-function menuState:update(dt)
+function menuState:update( dt )
   -- Options Selection
   if (menuState.currentSelectedOption > menuState.numberOfOptions) then
     menuState.currentSelectedOption = 1;
@@ -89,7 +96,7 @@ function menuState:draw()
 end
 
 -- KeyPressed
-function menuState:keypressed(key, unicode)
+function menuState:keypressed( key, unicode )
   if (key == "up") then 
     if (menuState.options[menuState.currentSelectedOption-1] ~= nil) then
       if (menuState.options[menuState.currentSelectedOption-1].implemented) then
@@ -114,16 +121,16 @@ function menuState:keypressed(key, unicode)
 end
 
 -- KeyReleased
-function menuState:keyreleased(key, unicode)
+function menuState:keyreleased( key, unicode )
   if (key == "return") then
     menuState.canChoose = true;
   end
 end
 
 -- MousePressed
-function menuState:mousepressed(x, y, button)
+function menuState:mousepressed( x, y, button )
 end
 
 -- MouseReleased
-function menuState:mousereleased(x, y, button)
+function menuState:mousereleased( x, y, button )
 end

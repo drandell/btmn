@@ -1,5 +1,5 @@
 --[[
- -- Enemy Base Class
+ -- Enemy base class
  -- Mainly for thugs & the like, generic enemies behaviour 
  -- Started at roughly 10pm, April 14th 2014
  -- Dan
@@ -9,11 +9,12 @@ require("./Libraries/class");
 local LEFT = -1;
 local RIGHT = 1;
 
--- Global Table of Enemies that will contain enemies per scene
+-- Global table of enemies that will contain enemies per scene
 enemies = {}
 
--- Enemy Base Clas
-enemy = class(function(enemy,x,y,width,height,speedX, typeOf, state, nxtState, msg, offsetX, offsetY)
+--[[ Function ]]--
+-- Enemy base class
+enemy = class( function( enemy,x,y,width,height,speedX, typeOf, state, nxtState, msg, offsetX, offsetY )
               enemy.x = x;
               enemy.y = y;
               enemy.width = width;
@@ -41,7 +42,10 @@ enemy = class(function(enemy,x,y,width,height,speedX, typeOf, state, nxtState, m
               };
            end);
          
-function enemy:update(dt, colmap, gameSpeed)
+
+--[[ Function ]]--
+-- Enemy update
+function enemy:update( dt, colmap, gameSpeed )
   gameSpeed = gameSpeed or 1;
   -- TODO: Each enemy should have an individual range, but generic thugs 
   -- Will probably all have the same 
@@ -102,7 +106,8 @@ function enemy:update(dt, colmap, gameSpeed)
   self.collisionRect.x = (self.x + self.offset.x) + global.offsetX + global.tx;
   self.collisionRect.y = (self.y - self.offset.y) + global.offsetY + global.ty;
 end
-
+--[[ Function ]]--
+-- Enemy draw
 function enemy:draw()
   if (self.state ~= "speak") then 
     if (self.x + self.width + global.tx > 0) then 

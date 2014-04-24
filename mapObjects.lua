@@ -5,7 +5,7 @@
  -- Dan
 ]]--
 
-function loadEnemies(map)
+function loadEnemies( map )
   local redHoodImg = love.graphics.newImage("Content/Images/testEnemy.png");
   
   -- Are there enemies on this map?

@@ -1,16 +1,20 @@
 --[[
  -- Love Configuration File
+ -- Created In a different project, a long time ago...
  -- Dan
 ]]--
 
+-- Some helpful globals
 version = "0.9.1";
-title = "BTMN #1";
-author = "Wizardry Games";
-url = "www.wizardrygames.com";
 width = 720;
 height = 400;
-iconPath = "Content/Images/icon.png";
+-- Locals
+local title = "BTMN #1";
+local author = "Wizardry Games";
+local url = "www.wizardrygames.com";
+local iconPath = "Content/Images/icon.png";
 
+-- Love configuration
 function love.conf(t)
     t.identity = nil                   -- The name of the save directory (string)
     t.author = author;                 -- The author of the game (string)
