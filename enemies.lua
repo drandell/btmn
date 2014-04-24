@@ -61,7 +61,7 @@ function enemy:update(dt, colmap, gameSpeed)
   
   elseif (self.state == "speak") then
     -- Enemy has something to say
-    global.currentGameSpeed = 0; -- STOP THE PRESS!
+    --global.currentGameSpeed = 0; -- STOP THE PRESS!
     local delta = (love.timer.getAverageDelta() * 1000);
     self.dly = self.dly - delta;
     
@@ -69,7 +69,7 @@ function enemy:update(dt, colmap, gameSpeed)
     -- or b) let player press button to resume action.
     -- future; What if the enemy has a LOT to say?
     if (self.dly < 0) then
-      global.currentGameSpeed = 1;
+      --global.currentGameSpeed = 1;
       self.alpha = self.alpha - 10;
       
       if (self.alpha < 0) then

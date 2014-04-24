@@ -382,12 +382,21 @@ function btmn:updateBatarangs( enemy , gameSpeed)
         and (batarang.y + batarang.height + global.ty > enemy.y) 
         and (batarang.y < enemy.y + enemy.height) then
           enemy.health = enemy.health - BATARANG_DMG;
+          batarang.active = false;
+          btmn.activeBatarangs = btmn.activeBatarangs - 1;
           -- If Player is too far away then here we should probably
           -- Have a check to see if the next state makes the enemy cautious 
           -- And not immediately go to the next state but for now it'll do.
-          enemy.state = enemy.nxtState;
-          batarang.active = false;
-          btmn.activeBatarangs = btmn.activeBatarangs - 1;
+          -- But he should defiantly be stunned for a bit
+          if (enemy.nxtState == "speak") then
+              enemy.state = enemy.nxtState;
+              enemy.nxtState = "stunned"; 
+          else
+              -- TODO: Not yet implemented
+              if (enemy.nxtState == "stunned") then
+                enemy.state = "actioned";
+              end
+          end
       end
       
     end
