@@ -46,9 +46,6 @@ btmn.selectedConvoOption = 0;
 offset = {x = 0, y = 0};
 btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width,                    height = btmn.height };
 
--- Rope object
-rope = {}
-
 -- Collision tile variables
 left = 0;
 right = 0;
@@ -56,6 +53,9 @@ up = 0;
 middleX = 0;
 middleY = 0;
 down = 0;
+
+-- Requires
+require("rope");
 
 -- Animations
 --[[
@@ -199,65 +199,6 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
     
   end
 end
---[[ Local Function ]]--
--- Is btmn colliding with a rope?
-function checkCollisionWithRope( colmap )
-  if (colmap("Ropes")) then
-      for i, obj in pairs( colmap("Ropes").objects ) do
-          if (boxCollisionHalfWidth(obj.drawInfo.left + global.tx, obj.drawInfo.top + global.ty, obj.width, obj.height)) then
-            btmn.collidingWithRope = true;
-            rope = obj;
-            break;
-          else
-            btmn.collidingWithRope = false;
-          end
-      end
-  end
-end
---[[ Local Function ]]--
--- Is btmn at the top of a rope?
-function AtTopOfRope()
-    if (btmn.collidingWithRope) then 
-      if (btmn.collisionRect.y <= rope.drawInfo.top) then
-        return true;
-      else 
-        return false;
-      end
-    else
-      return false;
-    end
-end
---[[ Local Function ]]--
--- Is btmn at the bottom of a rope?
-function AtBottomOfRope()
-    if (btmn.collidingWithRope) then 
-      if (btmn.collisionRect.y + btmn.collisionRect.height >= rope.drawInfo.bottom) then
-        return true;
-      else 
-        return false;
-      end
-    else
-      return false;
-    end
-end
---[[ Function ]]--
--- Can btmn move up rope?
-function canMoveUpRope()
-  if (btmn.collisionRect.y <= rope.drawInfo.top) then
-    return false;
-  else
-    return true;
-  end
-end
---[[ Local Function ]]--
--- Can btmn move down rope?
-function canMoveDownRope()
-  if (btmn.collisionRect.y + btmn.collisionRect.height >= rope.drawInfo.bottom) then
-    return false;
-  else
-    return true;
-  end
-end
 --[[ Function ]]--
 -- Update
 function btmn:update( dt, colmap, gameSpeed )
@@ -373,6 +314,12 @@ function btmn:updateBatarangs( enemy , gameSpeed )
   
   for i, batarang in pairs( btmn.batarangs ) do
     if (batarang.active) then
+      batarang.angle = batarang.angle + 5;
+      
+      if (batarang.angle > 360) then
+        batarang.angle = 0;
+      end
+      
       if (batarang.dir == "left") then
           batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
       elseif (batarang.dir == "right") then
@@ -437,9 +384,11 @@ function btmn:draw()
   -- Draw Batarangs
   for i, batarang in pairs( btmn.batarangs ) do
     if (batarang.active) then
+      local rotatePoint = 2;
         love.graphics.draw(btmn.batarangImg, 
-          batarang.x + global.tx + global.offsetX, 
-          batarang.y + global.ty + global.offsetY);
+          batarang.x + rotatePoint + global.tx + global.offsetX, 
+          batarang.y + rotatePoint + global.ty + global.offsetY,
+          math.rad(batarang.angle));
     end
   end
   
@@ -507,7 +456,9 @@ function btmn:keypressed( key, unicode )
              width = btmn.batarangImg:getWidth(),
              height = btmn.batarangImg:getHeight(),
              active = true, 
-             dir = "right"};
+             angle = 0,
+             dir = "right"
+           };
         end
         
         if (btmn.currentState == "standingLeft" or btmn.currentState == "movingLeft") then
@@ -517,7 +468,9 @@ function btmn:keypressed( key, unicode )
              width = btmn.batarangImg:getWidth(),
              height = btmn.batarangImg:getHeight(),
              active = true, 
-             dir = "left"};
+             angle = 0,
+             dir = "left"
+           };
         end
         
         btmn.activeBatarangs = btmn.activeBatarangs + 1;
