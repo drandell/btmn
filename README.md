@@ -1,5 +1,6 @@
 BTMN
 ====
+![Logo](Content/Images/logo.png)
 
 Batman Fan Project created by Wizardry Games (Daniel Randell & John Riselvato)
 
