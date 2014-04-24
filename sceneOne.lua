@@ -51,6 +51,7 @@ function sceneOne:update(dt)
   -- Update Enemies
   for i, enemy in pairs( enemies ) do
       enemy:update(dt, map, global.currentGameSpeed);
+      btmn:updateBatarangs(enemy, global.currentGameSpeed);
     end
 end
 

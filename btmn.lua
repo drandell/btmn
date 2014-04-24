@@ -22,6 +22,12 @@ btmn.direction = RIGHT;
 btmn.health = 100;
 btmn.drawDebug = false;
 
+-- Batarang
+btmn.batarangs = {};
+btmn.batarangImg = love.graphics.newImage("Content/Images/batarang.png");
+btmn.activeBatarangs = 0;
+btmn.maxNumberOfBatarangs = 1;
+
 -- Character Action Bools
 btmn.currentState = "standing";
 btmn.currentAnim = nil;
@@ -136,7 +142,7 @@ function movebtmn(dirx, diry, collisionMap, gSpeed)
       btmn.y = (btmn.y - (btmn.speedY * diry) * gSpeed); 
     end
     
-    if (btmn.x < 0) then btmn.x = global.offsetX; end
+    if (btmn.x < 0) then btmn.x = 0; end
     if (btmn.x + btmn.width + btmn.speedX > (map.width * map.tileWidth)) then 
       btmn.x = (map.width * map.tileWidth) - btmn.width - btmn.speedX;
     end
@@ -349,6 +355,45 @@ function btmn:update(dt, colmap, gameSpeed)
   btmn.collisionRect.y = (btmn.y - offset.y) + global.offsetY + global.ty;
 end
 
+function btmn:updateBatarangs( enemy , gameSpeed)
+  gameSpeed = gameSpeed or 1;
+  local BATARANG_SPD = 4;
+  local BATARANG_DMG = 20;
+  
+  for i, batarang in pairs( btmn.batarangs ) do
+    if (batarang.active) then
+      if (batarang.dir == "left") then
+          batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
+      elseif (batarang.dir == "right") then
+          batarang.x = batarang.x + (BATARANG_SPD * gameSpeed);
+      end
+      
+      if (batarang.x + btmn.batarangImg:getWidth() * 2 > global.gameWorldWidth) then
+        batarang.active = false;
+        btmn.activeBatarangs = btmn.activeBatarangs - 1;
+      elseif (batarang.x < 0) then
+        batarang.active = false;
+        btmn.activeBatarangs = btmn.activeBatarangs - 1;
+      end
+      
+      -- Check Collision Against Enemies
+      if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
+        and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
+        and (batarang.y + batarang.height + global.ty > enemy.y) 
+        and (batarang.y < enemy.y + enemy.height) then
+          enemy.health = enemy.health - BATARANG_DMG;
+          -- If Player is too far away then here we should probably
+          -- Have a check to see if the next state makes the enemy cautious 
+          -- And not immediately go to the next state but for now it'll do.
+          enemy.state = enemy.nxtState;
+          batarang.active = false;
+          btmn.activeBatarangs = btmn.activeBatarangs - 1;
+      end
+      
+    end
+  end
+end
+
 function btmn:draw()
   -- Draw btmn  
   if (btmn.currentState == "standingRight" or btmn.currentState == "movingRight") then
@@ -367,6 +412,15 @@ function btmn:draw()
     btmn.walkRight:draw(WalkImg, btmn.x + walkWidthOffset + global.tx, btmn.y + global.ty, 0, -1, 1, btmn.width + (    offset.x * 2));
   end
   ]]--
+  
+  -- Draw Batarangs
+  for i, batarang in pairs( btmn.batarangs ) do
+    if (batarang.active) then
+        love.graphics.draw(btmn.batarangImg, 
+          batarang.x + global.tx + global.offsetX, 
+          batarang.y + global.ty + global.offsetY);
+    end
+  end
   
   -- Temp Health Bar & Map Information 
   -- TODO: Move to a UI implementation
@@ -418,6 +472,33 @@ function btmn:keypressed(key, unicode)
     if (key == " ") and not btmn.jumping then
         btmn.jumping = true;
         btmn.speedY = 8;
+    end
+    
+    -- Throw Batarang(s)!
+    if (key == "q") and not btmn.jumping then
+      if (btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
+        if (btmn.currentState == "standingRight" or btmn.currentState == "movingRight") then
+           btmn.batarangs[btmn.activeBatarangs+1] = {
+             x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
+             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight()), 
+             width = btmn.batarangImg:getWidth(),
+             height = btmn.batarangImg:getHeight(),
+             active = true, 
+             dir = "right"};
+        end
+        
+        if (btmn.currentState == "standingLeft" or btmn.currentState == "movingLeft") then
+           btmn.batarangs[btmn.activeBatarangs+1] = {
+             x = btmn.collisionRect.x - global.offsetX - (btmn.batarangImg:getWidth() * 2), 
+             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight()), 
+             width = btmn.batarangImg:getWidth(),
+             height = btmn.batarangImg:getHeight(),
+             active = true, 
+             dir = "left"};
+        end
+        
+        btmn.activeBatarangs = btmn.activeBatarangs + 1;
+      end
     end
   end
 end

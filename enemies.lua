@@ -21,6 +21,7 @@ enemy = class(function(enemy,x,y,width,height,speedX, typeOf, state, nxtState, m
               enemy.speedX = speedX;
               enemy.direction = -1;
               enemy.health = 100;
+              enemy.alive = true;
               enemy.typeOf = typeOf;
               enemy.img = nil;
               enemy.animations = {};
