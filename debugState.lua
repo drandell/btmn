@@ -41,9 +41,11 @@ end
 -- Draw
 function debugState:draw()
   love.graphics.setFont(gameFont);
-
-  love.graphics.printf("Using version: " .. version, 0, 0, love.window.getWidth() - 6, "right");
-  love.graphics.printf("FPS: " .. tostring(love.timer.getFPS()), 0, 0, love.window.getWidth(), "left");
+  love.graphics.setColor(red);
+  
+  love.graphics.printf("Using version: " .. version, 0, 0, global.viewportWidth - 6, "right");
+  love.graphics.printf("FPS: " .. tostring(love.timer.getFPS()), 0, 0, global.viewportWidth, "left");
+  love.graphics.printf("Current State: ".. getActiveStates()[1], 0, 10, global.viewportWidth, "left");
   
   love.graphics.print("Scroll X: " .. global.tx, 6, 280);
   love.graphics.print("X: " .. btmn.x, 6, 300);

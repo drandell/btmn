@@ -39,6 +39,7 @@ btmn = require "btmn";
 require("debugState");
 --require("testState");
 require("menuState");
+require("menuOptionsState");
 require("sceneOne");
 require("jkr");
 
@@ -55,6 +56,7 @@ function love.load( arg )
   
     -- States
     addState(menuState, "menu");
+    addState(menuOptionsState, "menuOptions");
     --addState(testState, "test");
     addState(sceneOne, "sceneOne");
     addState(debugState, "debug");
@@ -88,7 +90,10 @@ function love.keypressed(key, unicode)
    lovelyMoon.keypressed(key, unicode);
    
    -- Enable Debug Drawing
-   if (key == "f1") then toggleState("debug"); btmn.drawDebug = not btmn.drawDebug; end
+   if (key == "f1") and getActiveStates()[1] == "sceneOne" then 
+     toggleState("debug"); 
+     btmn.drawDebug = not btmn.drawDebug; 
+   end
 end
 
 function love.keyreleased(key, unicode)

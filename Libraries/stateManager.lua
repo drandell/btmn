@@ -28,6 +28,16 @@ function getState( id )
    end
 end
 
+function getActiveStates( )
+   local activeStates = {};
+   for index, state in pairs (stateManager.states) do
+      if state._enabled then
+         activeStates[#activeStates+1] = state._id;
+      end
+   end
+   return activeStates;
+end
+
 function enableState( id )
    for index, state in pairs (stateManager.states) do
       if state._id == id then

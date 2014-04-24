@@ -3,10 +3,11 @@ menuState.logo = nil;
 menuState.logoPos = { x = 0, y = 0 };
 menuState.options = { 
   {text = "Play Episode #1", implemented = true, gotoState = "sceneOne"}, 
-  {text = "Options", implemented = false, gotoState = "options"} 
+  {text = "Options", implemented = true, gotoState = "menuOptions"} 
 };
 menuState.currentSelectedOption = 1;
-menuState.numberOfOptions = 2;
+menuState.numberOfOptions = #menuState.options;
+menuState.canChoose = true;
 
 -- New
 function menuState:new()
@@ -63,7 +64,7 @@ function menuState:draw()
     if (menuState.options[i].implemented) then 
       
       if (i ~= menuState.currentSelectedOption) then
-        love.graphics.setColor(white); 
+        love.graphics.setColor(black); 
       else
         love.graphics.setColor(green); 
       end
@@ -84,27 +85,29 @@ function menuState:draw()
     end
   end
 
+  --love.graphics.print("Current Selected Itm: ".. menuState.currentSelectedOption, 0, 0);
 end
 
 -- KeyPressed
 function menuState:keypressed(key, unicode)
   if (key == "up") then 
-    if (menuState.options[menuState.currentSelectedOption+1] ~= nil) then
-      if (menuState.options[menuState.currentSelectedOption+1].implemented) then
-        menuState.currentSelectedOption = menuState.currentSelectedOption + 1; 
-      end
-    end
-  elseif (key == "down") then
     if (menuState.options[menuState.currentSelectedOption-1] ~= nil) then
       if (menuState.options[menuState.currentSelectedOption-1].implemented) then
         menuState.currentSelectedOption = menuState.currentSelectedOption - 1; 
       end
     end
+  elseif (key == "down") then
+    if (menuState.options[menuState.currentSelectedOption+1] ~= nil) then
+      if (menuState.options[menuState.currentSelectedOption+1].implemented) then
+        menuState.currentSelectedOption = menuState.currentSelectedOption + 1; 
+      end
+    end
   end
   
-  if (key == "return") then
+  if (key == "return") and menuState.canChoose then
     if (menuState.options[menuState.currentSelectedOption].implemented) then
       disableState("menu");
+      menuState.canChoose = false;
       enableState(menuState.options[menuState.currentSelectedOption].gotoState);
     end
   end
@@ -112,6 +115,9 @@ end
 
 -- KeyReleased
 function menuState:keyreleased(key, unicode)
+  if (key == "return") then
+    menuState.canChoose = true;
+  end
 end
 
 -- MousePressed
