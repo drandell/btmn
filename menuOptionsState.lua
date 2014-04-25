@@ -9,11 +9,11 @@ menuOptionsState = {}
 menuOptionsState.logo = nil;
 menuOptionsState.logoPos = { x = 0, y = 0 };
 menuOptionsState.options = { 
-  {text = "Master BG Volume", implemented = false, gotoState = "nil"}, 
-  {text = "Master Sound Effect Volume:", implemented = false, gotoState = "nil"},
-  {text = "Back", implemented = true, gotoState = "menu"},
+  {text = "Master BG Volume:", xOffset = 60, implemented = true, gotoState = "nil"}, 
+  {text = "Master Sound Effect Volume:", xOffset = 60, implemented = true, gotoState = "nil"},
+  {text = "Back", xOffset = 0, implemented = true, gotoState = "menu"},
 };
-menuOptionsState.currentSelectedOption = 3;
+menuOptionsState.currentSelectedOption = 1;
 menuOptionsState.numberOfOptions = #menuOptionsState.options;
 menuOptionsState.canChoose = false;
 
@@ -64,11 +64,12 @@ function menuOptionsState:draw()
   love.graphics.setBackgroundColor(white);
   love.graphics.draw(menuOptionsState.logo, menuOptionsState.logoPos.x, menuOptionsState.logoPos.y);
   
+  -- Locals, to justify Y coord of menu text
+  local startY = 300;
+  local yIncrement = 20;
+  
   for i = 1, menuOptionsState.numberOfOptions do
-    -- Locals, to justify Y coord of menu text
-    local startY = 300;
-    local yIncrement = 20;
-    
+ 
     if (menuOptionsState.options[i].implemented) then 
       
       if (i ~= menuOptionsState.currentSelectedOption) then
@@ -79,7 +80,7 @@ function menuOptionsState:draw()
       local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[i].text);
       love.graphics.print(
         menuOptionsState.options[i].text, 
-        menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) - (textWidthInPixels / 2), 
+        menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) - (textWidthInPixels / 2) - menuOptionsState.options[i].xOffset, 
         startY + (i * yIncrement)
         );
     else 
@@ -87,12 +88,41 @@ function menuOptionsState:draw()
       local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[i].text .. " (Not Implemented)");
       love.graphics.print(
         menuOptionsState.options[i].text .. " (Not Implemented)", 
-        menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) - (textWidthInPixels / 2), 
+        menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) - (textWidthInPixels / 2) - menuOptionsState.options[i].xOffset, 
         startY + (i * yIncrement)
         );
     end
   end
-
+  
+  for j = 0, 9 do
+    if (menuOptionsState.currentSelectedOption == 1 and j < (global.bgVolume * 10)) then
+      love.graphics.setColor(green);
+    elseif (j < (global.bgVolume * 10)) then
+      love.graphics.setColor(red);
+    else
+      love.graphics.setColor(black);
+    end
+    
+    local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[1].text);
+    love.graphics.rectangle("fill", 
+      menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) + (textWidthInPixels / 2) - menuOptionsState.options[1].xOffset + 6 + j*10 + (j*2), 
+      startY + yIncrement + 3, 10, 10); 
+  end
+  
+  for k = 0, 9 do
+    if (menuOptionsState.currentSelectedOption == 2 and k < (global.sfxVolume * 10)) then
+      love.graphics.setColor(green);
+    elseif (k < (global.sfxVolume * 10)) then
+      love.graphics.setColor(red);
+    else
+      love.graphics.setColor(black);
+    end
+    
+    local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[2].text);
+    love.graphics.rectangle("fill", 
+      menuOptionsState.logoPos.x + (menuOptionsState.logo:getWidth() / 2) + (textWidthInPixels / 2) - menuOptionsState.options[2].xOffset + 6 + k*10 + (k*2), 
+      startY + (yIncrement * 2) + 3, 10, 10); 
+  end
 end
 
 -- KeyPressed
@@ -113,11 +143,29 @@ function menuOptionsState:keypressed( key, unicode )
   
   if (key == "return") and menuOptionsState.currentSelectedOption == #menuOptionsState.options and
     menuOptionsState.canChoose then
-    if (menuOptionsState.options[menuOptionsState.currentSelectedOption].implemented) then
+    if (menuOptionsState.options[menuOptionsState.currentSelectedOption].implemented) and
+      menuOptionsState.options[menuOptionsState.currentSelectedOption].gotoState ~= "nil" then
       disableState("menuOptions");
       menuOptionsState.canChoose = false;
       enableState(menuOptionsState.options[menuOptionsState.currentSelectedOption].gotoState);
     end
+  end
+  
+  -- Specific menu options
+  if (menuOptionsState.currentSelectedOption == 1 and global.bgVolume >= 0 and global.bgVolume <= 1) then
+      if (key == "left") then global.bgVolume = global.bgVolume - 0.1; 
+      elseif (key == "right") then global.bgVolume = global.bgVolume + 0.1;
+    end
+    if (global.bgVolume < 0) then global.bgVolume = 0; end
+    if (global.bgVolume > 1) then global.bgVolume = 1; end
+    
+  elseif (menuOptionsState.currentSelectedOption == 2 and global.sfxVolume >= 0 and global.sfxVolume <= 1) then
+      if (key == "left") then global.sfxVolume = global.sfxVolume - 0.1; 
+      elseif (key == "right") then global.sfxVolume = global.sfxVolume + 0.1;
+    end
+    if (global.sfxVolume < 0) then global.sfxVolume = 0; end
+    if (global.sfxVolume > 1) then global.sfxVolume = 1; end
+    
   end
 end
 

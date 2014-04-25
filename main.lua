@@ -23,14 +23,16 @@ global = {};
 global.tx = 0;                   -- X translation of the screen
 global.ty = 0;                   -- Y translation of the screen
 global.scale = 1;                -- Scale of the screen
-global.tSize = 32;               -- Tile Size
-global.offsetX = 40;             -- Viewport Offset X
-global.offsetY = 40;             -- Viewport Offset Y
-global.viewportWidth = width;    -- Actual Window Width
-global.viewportHeight = height;  -- Actual Window Height
-global.gameWorldWidth = 640;     -- Game World Width Viewport
-global.gameWorldHeight = 320;    -- Game World Height Viewport
-global.currentGameSpeed = 1;     -- Game World Speed 
+global.tSize = 32;               -- Tile size
+global.offsetX = 40;             -- Viewport offset X
+global.offsetY = 40;             -- Viewport offset Y
+global.viewportWidth = width;    -- Actual window width
+global.viewportHeight = height;  -- Actual window height
+global.gameWorldWidth = 640;     -- Game world width viewport
+global.gameWorldHeight = 320;    -- Game world height viewport
+global.currentGameSpeed = 1;     -- Game world speed 
+global.bgVolume = 0.5;           -- Background music volume
+global.sfxVolume = 0.5;          -- SFX volume
 
 -- Btmn
 btmn = require "btmn";
