@@ -60,8 +60,9 @@ end
 function menuState:draw()
   love.graphics.clear();
   
-  love.graphics.setBackgroundColor(white);
+  love.graphics.setColor(yellow);
   love.graphics.draw(menuState.logo, menuState.logoPos.x, menuState.logoPos.y);
+  love.graphics.setBackgroundColor(black);
   
   for i = 1, menuState.numberOfOptions do
     -- Locals, to justify Y coord of menu text
@@ -71,9 +72,9 @@ function menuState:draw()
     if (menuState.options[i].implemented) then 
       
       if (i ~= menuState.currentSelectedOption) then
-        love.graphics.setColor(black); 
+        love.graphics.setColor(white); 
       else
-        love.graphics.setColor(green); 
+        love.graphics.setColor(yellow); 
       end
       local textWidthInPixels = love.graphics.getFont():getWidth(menuState.options[i].text);
       love.graphics.print(

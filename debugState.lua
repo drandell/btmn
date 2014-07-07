@@ -44,6 +44,8 @@ function debugState:draw()
   
   love.graphics.print("Scroll X: " .. global.tx, 6, 280);
   love.graphics.print("X: " .. btmn.x, 6, 300);
+  love.graphics.print("Y: " .. btmn.y, 6, 310);
+  love.graphics.print("Anim: " .. btmn.currentState, 6, 370);
   
   love.graphics.setNewFont(12);
   

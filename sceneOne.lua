@@ -52,6 +52,7 @@ function sceneOne:update( dt )
   for i, enemy in pairs( enemies ) do
       enemy:update(dt, map, global.currentGameSpeed);
       btmn:updateBatarangs(enemy, global.currentGameSpeed);
+      enemy:updateStatus(i);
     end
 end
 
@@ -87,7 +88,7 @@ function sceneOne:draw()
     
     -- Draw UI Border 
     -- TODO: Move to UI implementation
-    love.graphics.setColor(255, 255, 255);
+    love.graphics.setColor(white);
     love.graphics.setLineWidth(4);
     love.graphics.rectangle("line", global.offsetX, global.offsetY, global.gameWorldWidth, global.gameWorldHeight);  
     love.graphics.setLineWidth(1);

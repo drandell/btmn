@@ -11,13 +11,14 @@ local RIGHT = 1;
 btmn = {};
 
 -- Attributes
-btmn.img = love.graphics.newImage("Content/Images/test.png");
-btmn.height = 32;
+btmn.debugImg = love.graphics.newImage("Content/Images/test.png");
+btmn.height = 64;
 btmn.width = 32;
 btmn.x = 20;
 btmn.y = 60;
 btmn.speedX = 2;
 btmn.speedY = 0;
+btmn.oldDirection = RIGHT;
 btmn.direction = RIGHT;
 btmn.health = 100;
 btmn.drawDebug = false;
@@ -29,10 +30,11 @@ btmn.activeBatarangs = 0;
 btmn.maxNumberOfBatarangs = 1;
 
 -- Character action bools
-btmn.currentState = "standing";
+btmn.currentState = "standingRight";
 btmn.currentAnim = nil;
 btmn.canMove = true;
 btmn.jumping = false;
+btmn.ducking = false;
 
 -- Rope bools
 btmn.collidingWithRope = false;
@@ -57,10 +59,33 @@ down = 0;
 -- Requires
 require("rope");
 
--- Animations
---[[
-WalkImg = love.graphics.newImage("Content/Images/walkingAnimationSheet.png");
 
+-- Animation imgs
+btmn.standImg = love.graphics.newImage("Content/Images/btmnStand.png");
+btmn.duckImg = love.graphics.newImage("Content/Images/btmnDuck.png");
+btmn.standUpImg = love.graphics.newImage("Content/Images/btmnStandUp.png");
+
+-- Animations
+local standAndTurnRenderOffset = 10;
+local standGrid = anim8.newGrid(50, 64, btmn.standImg:getWidth(), btmn.standImg:getHeight());
+btmn.standRight = anim8.newAnimation(standGrid('1-5',1), {0.7, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.standLeft = btmn.standRight:clone():flipH();
+
+btmn.turnRight = anim8.newAnimation(standGrid('5-1',1), {0.1, 0.1, 0.1, 0.1, 0.7}, 'pauseAtEnd');
+btmn.turnLeft = btmn.turnRight:clone():flipH();
+
+local duckRenderOffset = 15;
+local duckGrid = anim8.newGrid(60, 64, btmn.duckImg:getWidth(), btmn.duckImg:getHeight());
+btmn.duckRight = anim8.newAnimation(duckGrid('1-6',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.duckLeft = btmn.duckRight:clone():flipH();
+
+local standUpRenderOffset = 15;
+local standUpGrid = anim8.newGrid(60, 64, btmn.standUpImg:getWidth(), btmn.standUpImg:getHeight());
+btmn.upRight = anim8.newAnimation(standUpGrid('1-3',1), {0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.upLeft = btmn.upRight:clone():flipH();
+
+btmn.currentAnim = btmn.standRight;
+--[[
 local walkGrid = anim8.newGrid(120, 120, WalkImg:getWidth(), WalkImg:getHeight())
 btmn.walkRight = anim8.newAnimation(walkGrid('1-8',1), 0.1)
 btmn.walkLeft = anim8.newAnimation(walkGrid('8-1',1), 0.1):flipH();
@@ -80,7 +105,7 @@ end
 -- Half width bounding box collision detection
 function boxCollisionHalfWidth( x, y, width, height )
   if (btmn.direction == RIGHT) then
-      if (btmn.collisionRect.x + (btmn.width / 2) > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y +         btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
+      if (btmn.collisionRect.x + (btmn.width / 2) > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
         return true;
       else
         return false;
@@ -204,10 +229,10 @@ end
 function btmn:update( dt, colmap, gameSpeed )
   gameSpeed = gameSpeed or 1;
   
+  
+  btmn.oldDirection = btmn.direction;
   -- Update Anim
-  --[[
-    btmn.currentAnim:update(dt);
-  ]]--
+  btmn.currentAnim:update(dt);
   
   -- Check to see if the object should be falling
 	fall(colmap("Collision Layer"));
@@ -216,40 +241,116 @@ function btmn:update( dt, colmap, gameSpeed )
   
   -- btmn Movement Update
   if not btmn.onRope and btmn.canMove then
-    if (love.keyboard.isDown("right")) then 
-        btmn.direction = RIGHT;
-        moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed);  
-        btmn.currentState = "movingRight";
-        --btmn.currentAnim = btmn.walkRight;
-    end
-  
-    if (love.keyboard.isDown("left")) then 
-        btmn.direction = LEFT;
-        moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-        btmn.currentState = "movingLeft";
-        --btmn.currentAnim = btmn.walkLeft;
-    end
     
-    if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
-      if (btmn.direction == RIGHT) then
-        btmn.currentState = "standingRight";
-        --btmn.currentAnim = btmn.standRight;
-      else
-        btmn.currentState = "standingLeft";
-        --btmn.currentAnim = btmn.standLeft;
+    if not btmn.ducking then
+      if (love.keyboard.isDown("right")) then 
+          btmn.direction = RIGHT;
+          moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          
+          if (btmn.oldDirection == LEFT) then
+            btmn.standRight:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "turningRight";
+            btmn.currentAnim = btmn.turnRight;
+            btmn.currentAnim:resume();
+          end
+          --btmn.currentAnim = btmn.walkRight;
       end
-    end
- 
-    if (btmn.jumping) then
-        jump(colmap("Collision Layer"), gameSpeed);
+    
+      if (love.keyboard.isDown("left")) then 
+          btmn.direction = LEFT;
+          moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          
+          if (btmn.oldDirection == RIGHT) then
+            btmn.standLeft:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "turningLeft";
+            btmn.currentAnim = btmn.turnLeft;
+            btmn.currentAnim:resume();
+          end
+          --btmn.currentAnim = btmn.walkLeft;
+      end
+    
+      if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
+          if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
+            btmn.turnRight:pauseAtStart(); -- Reset turning animation
+            btmn.currentState = "standingRight";
+            btmn.currentAnim = btmn.standRight;   
+            btmn.currentAnim:resume();
+            
+          elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
+            btmn.turnLeft:pauseAtStart(); -- Reset turning animation
+            btmn.currentState = "standingLeft";
+            btmn.currentAnim = btmn.standLeft;
+            btmn.currentAnim:resume();
+          
+          elseif (btmn.currentState == "standingUpRight" and btmn.currentAnim.status == "paused") then
+            btmn.upRight:pauseAtStart(); -- Reset standing up animation
+            btmn.currentState = "standingRight";
+            btmn.currentAnim = btmn.standRight;
+            btmn.currentAnim:resume();
+            
+          elseif (btmn.currentState == "standingUpLeft" and btmn.currentAnim.status == "paused") then
+            btmn.upLeft:pauseAtStart(); -- Reset standing up animation
+            btmn.currentState = "standingLeft";
+            btmn.currentAnim = btmn.standLeft;
+            btmn.currentAnim:resume();
+          end
+      end
+   
+      if (btmn.jumping) then
+          jump(colmap("Collision Layer"), gameSpeed);     
+      end
+    end  
+    
+    if (love.keyboard.isDown("down")) then
+      if (not btmn.ducking) then
+        btmn.currentAnim:pauseAtStart(); -- Reset Whatever animation is currently active
+      end
+      btmn.ducking = true;
+      
+      if (btmn.direction == RIGHT) then
+        btmn.currentState = "duckingRight";       
+        btmn.currentAnim = btmn.duckRight;
+        btmn.currentAnim:resume();
+      elseif (btmn.direction == LEFT) then
+        btmn.currentState = "duckingLeft";       
+        btmn.currentAnim = btmn.duckLeft;
+        btmn.currentAnim:resume();
+      end
+      
+      -- TODO: Add Collision Rect change code as we duck, our collision rect will get smaller
+    elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
+      --TODO: Implement standing up animations
+      if (btmn.currentAnim.status == "paused") then
+        -- Fully ducked, stand up animation
+        btmn.currentAnim:pauseAtStart(); -- Reset Whatever ducking animation is currently active
+      
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "standingUpRight";       
+          btmn.currentAnim = btmn.upRight;
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "standingUpLeft";       
+          btmn.currentAnim = btmn.upLeft;
+        end
         
-        --if (btmn.direction == RIGHT) then
-        --btmn.currentAnim = btmn.jumpRight;
-        --elseif (btmn.direction == LEFT) then
-        --btmn.currentAnim = btmn.jumpLeft;
-        --end       
+        btmn.currentAnim:resume();
+      else
+        -- We have not fully ducked, just revert back to standing
+        btmn.currentAnim:pauseAtStart(); -- Reset Whatever ducking animation is currently active
+        
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "standingRight";
+          btmn.currentAnim = btmn.standRight;   
+          btmn.currentAnim:resume();
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "standingLeft";
+          btmn.currentAnim = btmn.standLeft;
+          btmn.currentAnim:resume();
+        end
+      end
+      
+      btmn.ducking = false;
     end
-  elseif btmn.onRope then
+  elseif btmn.onRope and not btmn.ducking then
     -- Check to see if btmn can climb &
     -- Check to see if btmn can exit rope!
     --btmn.currentAnim = btmn.climb;
@@ -312,51 +413,54 @@ function btmn:updateBatarangs( enemy , gameSpeed )
   local BATARANG_SPD = 4;
   local BATARANG_DMG = 20;
   
-  for i, batarang in pairs( btmn.batarangs ) do
-    if (batarang.active) then
-      batarang.angle = batarang.angle + 5;
-      
-      if (batarang.angle > 360) then
-        batarang.angle = 0;
-      end
-      
-      if (batarang.dir == "left") then
-          batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
-      elseif (batarang.dir == "right") then
-          batarang.x = batarang.x + (BATARANG_SPD * gameSpeed);
-      end
-      
-      if (batarang.x + btmn.batarangImg:getWidth() * 2 > global.gameWorldWidth) then
-        batarang.active = false;
-        btmn.activeBatarangs = btmn.activeBatarangs - 1;
-      elseif (batarang.x < 0) then
-        batarang.active = false;
-        btmn.activeBatarangs = btmn.activeBatarangs - 1;
-      end
-      
-      -- Check Collision Against Enemies
-      if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
-        and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
-        and (batarang.y + batarang.height + global.ty > enemy.y) 
-        and (batarang.y < enemy.y + enemy.height) then
-          enemy.health = enemy.health - BATARANG_DMG;
+  if (enemy.state ~= "knockout") then
+    for i, batarang in pairs( btmn.batarangs ) do
+      if (batarang.active) then
+        batarang.angle = batarang.angle + 5;
+        
+        if (batarang.angle > 360) then
+          batarang.angle = 0;
+        end
+        
+        if (batarang.dir == "left") then
+            batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
+        elseif (batarang.dir == "right") then
+            batarang.x = batarang.x + (BATARANG_SPD * gameSpeed);
+        end
+        
+        if (batarang.x + btmn.batarangImg:getWidth() * 2 > global.gameWorldWidth) then
           batarang.active = false;
           btmn.activeBatarangs = btmn.activeBatarangs - 1;
-          -- If Player is too far away then here we should probably
-          -- Have a check to see if the next state makes the enemy cautious 
-          -- And not immediately go to the next state but for now it'll do.
-          -- But he should defiantly be stunned for a bit
-          if (enemy.nxtState == "speak") then
-              enemy.state = enemy.nxtState;
-              enemy.nxtState = "stunned"; 
-          else
-              -- TODO: Not yet implemented
-              if (enemy.nxtState == "stunned") then
-                enemy.state = "actioned";
-              end
-          end
+        elseif (batarang.x < 0) then
+          batarang.active = false;
+          btmn.activeBatarangs = btmn.activeBatarangs - 1;
+        end
+        
+        -- Check Collision Against Enemies
+        if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
+          and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
+          and (batarang.y + batarang.height + global.ty > enemy.y) 
+          and (batarang.y < enemy.y + enemy.height) then
+            enemy.health = enemy.health - BATARANG_DMG;
+            batarang.active = false;
+            btmn.activeBatarangs = btmn.activeBatarangs - 1;
+            global.targetedEnemy = enemy;
+            -- If Player is too far away then here we should probably
+            -- Have a check to see if the next state makes the enemy cautious 
+            -- And not immediately go to the next state but for now it'll do.
+            -- But he should defiantly be stunned for a bit
+            if (enemy.nxtState == "speak") then
+                enemy.state = enemy.nxtState;
+                enemy.nxtState = "stunned"; 
+            else
+                -- TODO: Not yet implemented
+                if (enemy.nxtState == "stunned") then
+                  enemy.state = "actioned";
+                end
+            end
+        end
+        
       end
-      
     end
   end
 end
@@ -364,14 +468,20 @@ end
 -- Draw
 function btmn:draw()
   -- Draw btmn  
-  if (btmn.currentState == "standingRight" or btmn.currentState == "movingRight") then
-    love.graphics.draw(btmn.img, 
-      btmn.x + global.tx + global.offsetX, 
-      btmn.y + global.ty + global.offsetY, 0, 1, 1);
-  elseif (btmn.currentState == "standingLeft" or btmn.currentState == "movingLeft") then
-    love.graphics.draw(btmn.img, 
-      btmn.x + global.tx + global.offsetX, 
-      btmn.y + global.ty + global.offsetY, 0, -1, 1, btmn.width + (offset.x * 2));
+  
+  if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft" or 
+    btmn.currentState == "turningRight" or btmn.currentState == "turningLeft") then
+      btmn.currentAnim:draw(btmn.standImg, 
+        btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
+        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+  elseif (btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft") then
+    btmn.currentAnim:draw(btmn.duckImg, 
+        btmn.x + global.tx + global.offsetX - duckRenderOffset, 
+        btmn.y + global.ty + global.offsetY, 0, 1, 1); 
+  elseif (btmn.currentState == "standingUpRight" or btmn.currentState == "standingUpLeft") then
+    btmn.currentAnim:draw(btmn.standUpImg, 
+        btmn.x + global.tx + global.offsetX - standUpRenderOffset, 
+        btmn.y + global.ty + global.offsetY, 0, 1, 1);
   end
   --[[
   if (btmn.movingRight) then

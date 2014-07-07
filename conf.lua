@@ -9,7 +9,7 @@ version = "0.9.1";
 width = 720;
 height = 400;
 -- Locals
-local title = "BTMN #1";
+local title = "BTMN";
 local author = "Wizardry Games";
 local url = "www.wizardrygames.com";
 local iconPath = "Content/Images/icon.png";

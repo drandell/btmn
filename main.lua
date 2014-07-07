@@ -33,6 +33,7 @@ global.gameWorldHeight = 320;    -- Game world height viewport
 global.currentGameSpeed = 1;     -- Game world speed 
 global.bgVolume = 0.5;           -- Background music volume
 global.sfxVolume = 0.5;          -- SFX volume
+global.targetedEnemy = nil;      -- Current enemy enagement
 
 -- Btmn
 btmn = require "btmn";
@@ -71,8 +72,8 @@ function love.load( arg )
     
     ----------------------------------------------
     -- Debug
-    btmn.x = 0;
-    btmn.y = 0;
+    btmn.x = 16;
+    btmn.y = 256;
     global.tx = 0;
    
     -- Load Global Resources such as Fonts

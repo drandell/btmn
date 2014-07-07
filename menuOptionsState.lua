@@ -61,8 +61,9 @@ end
 function menuOptionsState:draw()
   love.graphics.clear();
   
-  love.graphics.setBackgroundColor(white);
-  love.graphics.draw(menuOptionsState.logo, menuOptionsState.logoPos.x, menuOptionsState.logoPos.y);
+  love.graphics.setColor(yellow);
+  love.graphics.draw(menuState.logo, menuState.logoPos.x, menuState.logoPos.y);
+  love.graphics.setBackgroundColor(black);
   
   -- Locals, to justify Y coord of menu text
   local startY = 300;
@@ -73,9 +74,9 @@ function menuOptionsState:draw()
     if (menuOptionsState.options[i].implemented) then 
       
       if (i ~= menuOptionsState.currentSelectedOption) then
-        love.graphics.setColor(black); 
+        love.graphics.setColor(white); 
       else
-        love.graphics.setColor(green); 
+        love.graphics.setColor(yellow); 
       end
       local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[i].text);
       love.graphics.print(
@@ -96,11 +97,11 @@ function menuOptionsState:draw()
   
   for j = 0, 9 do
     if (menuOptionsState.currentSelectedOption == 1 and j < (global.bgVolume * 10)) then
-      love.graphics.setColor(green);
+      love.graphics.setColor(yellow);
     elseif (j < (global.bgVolume * 10)) then
       love.graphics.setColor(red);
     else
-      love.graphics.setColor(black);
+      love.graphics.setColor(white);
     end
     
     local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[1].text);
@@ -111,11 +112,11 @@ function menuOptionsState:draw()
   
   for k = 0, 9 do
     if (menuOptionsState.currentSelectedOption == 2 and k < (global.sfxVolume * 10)) then
-      love.graphics.setColor(green);
+      love.graphics.setColor(yellow);
     elseif (k < (global.sfxVolume * 10)) then
       love.graphics.setColor(red);
     else
-      love.graphics.setColor(black);
+      love.graphics.setColor(white);
     end
     
     local textWidthInPixels = love.graphics.getFont():getWidth(menuOptionsState.options[2].text);
@@ -128,15 +129,15 @@ end
 -- KeyPressed
 function menuOptionsState:keypressed( key, unicode )
   if (key == "up") then 
-    if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1] ~= nil) then
-      if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1].implemented) then
-        menuOptionsState.currentSelectedOption = menuOptionsState.currentSelectedOption + 1; 
-      end
-    end
-  elseif (key == "down") then
     if (menuOptionsState.options[menuOptionsState.currentSelectedOption-1] ~= nil) then
       if (menuOptionsState.options[menuOptionsState.currentSelectedOption-1].implemented) then
         menuOptionsState.currentSelectedOption = menuOptionsState.currentSelectedOption - 1; 
+      end
+    end
+  elseif (key == "down") then
+    if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1] ~= nil) then
+      if (menuOptionsState.options[menuOptionsState.currentSelectedOption+1].implemented) then
+        menuOptionsState.currentSelectedOption = menuOptionsState.currentSelectedOption + 1; 
       end
     end
   end

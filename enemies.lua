@@ -107,6 +107,14 @@ function enemy:update( dt, colmap, gameSpeed )
   self.collisionRect.y = (self.y - self.offset.y) + global.offsetY + global.ty;
 end
 --[[ Function ]]--
+-- Enemy status
+function enemy:updateStatus(index)
+  -- TODO: Add Death Animation finished
+  if (self.health <= 0) then
+    self.state = "knockout";
+  end
+end
+--[[ Function ]]--
 -- Enemy draw
 function enemy:draw()
   if (self.state ~= "speak") then 
