@@ -64,6 +64,7 @@ require("rope");
 btmn.standImg = love.graphics.newImage("Content/Images/btmnStand.png");
 btmn.duckImg = love.graphics.newImage("Content/Images/btmnDuck.png");
 btmn.standUpImg = love.graphics.newImage("Content/Images/btmnStandUp.png");
+btmn.walkImg = love.graphics.newImage("Content/Images/btmnWalk.png");
 
 -- Animations
 local standAndTurnRenderOffset = 10;
@@ -84,13 +85,12 @@ local standUpGrid = anim8.newGrid(60, 64, btmn.standUpImg:getWidth(), btmn.stand
 btmn.upRight = anim8.newAnimation(standUpGrid('1-3',1), {0.1, 0.1, 0.1}, 'pauseAtEnd');
 btmn.upLeft = btmn.upRight:clone():flipH();
 
+local walkRenderOffset = 20;
+local walkGrid = anim8.newGrid(70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
+btmn.walkRight = anim8.newAnimation(walkGrid('1-16',1), 0.1, 'pauseAtEnd');
+btmn.walkLeft = btmn.walkRight:clone():flipH();
+
 btmn.currentAnim = btmn.standRight;
---[[
-local walkGrid = anim8.newGrid(120, 120, WalkImg:getWidth(), WalkImg:getHeight())
-btmn.walkRight = anim8.newAnimation(walkGrid('1-8',1), 0.1)
-btmn.walkLeft = anim8.newAnimation(walkGrid('8-1',1), 0.1):flipH();
-walkWidthOffset = 8; -- 8 pixel offset due to difference in anim frame width & btmn width
-]]--
 
 --[[ Local Function ]]--
 -- Bounding box collision
@@ -229,7 +229,7 @@ end
 function btmn:update( dt, colmap, gameSpeed )
   gameSpeed = gameSpeed or 1;
   
-  
+  -- Keep track of old direction
   btmn.oldDirection = btmn.direction;
   -- Update Anim
   btmn.currentAnim:update(dt);
@@ -245,28 +245,42 @@ function btmn:update( dt, colmap, gameSpeed )
     if not btmn.ducking then
       if (love.keyboard.isDown("right")) then 
           btmn.direction = RIGHT;
-          moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          
+                 
           if (btmn.oldDirection == LEFT) then
             btmn.standRight:pauseAtStart(); -- Reset standing animation
             btmn.currentState = "turningRight";
             btmn.currentAnim = btmn.turnRight;
-            btmn.currentAnim:resume();
+          else
+            btmn.currentState = "walkingRight";
+            btmn.currentAnim = btmn.walkRight;
           end
-          --btmn.currentAnim = btmn.walkRight;
+          
+          if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingRight") then
+            btmn.walkRight:gotoFrame(8); --Reset
+          end
+          
+          --moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          btmn.currentAnim:resume();
       end
     
       if (love.keyboard.isDown("left")) then 
           btmn.direction = LEFT;
-          moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
           
           if (btmn.oldDirection == RIGHT) then
             btmn.standLeft:pauseAtStart(); -- Reset standing animation
             btmn.currentState = "turningLeft";
             btmn.currentAnim = btmn.turnLeft;
-            btmn.currentAnim:resume();
+          else
+            btmn.currentState = "walkingLeft";
+            btmn.currentAnim = btmn.walkLeft;
           end
-          --btmn.currentAnim = btmn.walkLeft;
+          
+          if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingLeft") then
+            btmn.walkLeft:gotoFrame(8); --Reset
+          end
+          
+          --moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          btmn.currentAnim:resume();
       end
     
       if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
@@ -468,7 +482,6 @@ end
 -- Draw
 function btmn:draw()
   -- Draw btmn  
-  
   if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft" or 
     btmn.currentState == "turningRight" or btmn.currentState == "turningLeft") then
       btmn.currentAnim:draw(btmn.standImg, 
@@ -482,14 +495,12 @@ function btmn:draw()
     btmn.currentAnim:draw(btmn.standUpImg, 
         btmn.x + global.tx + global.offsetX - standUpRenderOffset, 
         btmn.y + global.ty + global.offsetY, 0, 1, 1);
+  elseif (btmn.currentState == "walkingRight" or btmn.currentState == "walkingLeft") then
+    btmn.currentAnim:draw(btmn.walkImg, 
+        btmn.x + global.tx + global.offsetX - walkRenderOffset, 
+        btmn.y + global.ty + global.offsetY, 0, 1, 1);
   end
-  --[[
-  if (btmn.movingRight) then
-    btmn.walkRight:draw(WalkImg, btmn.x - walkWidthOffset + global.tx, btmn.y + global.ty);
-  elseif (btmn.movingLeft) then
-    btmn.walkRight:draw(WalkImg, btmn.x + walkWidthOffset + global.tx, btmn.y + global.ty, 0, -1, 1, btmn.width + (    offset.x * 2));
-  end
-  ]]--
+
   
   -- Draw Batarangs
   for i, batarang in pairs( btmn.batarangs ) do
