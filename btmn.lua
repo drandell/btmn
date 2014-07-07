@@ -504,6 +504,8 @@ function btmn:draw()
   
   -- Temp Health Bar & Map Information 
   -- TODO: Move to a UI implementation
+  love.graphics.setColor(black);
+  love.graphics.rectangle("fill", global.offsetX + 4, global.offsetY + 5, 74, 12); 
   for i = 0, btmn.health / 20 do
     love.graphics.setColor(red);
     love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
