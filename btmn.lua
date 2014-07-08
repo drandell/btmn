@@ -86,7 +86,8 @@ local standUpGrid = anim8.newGrid(60, 64, btmn.standUpImg:getWidth(), btmn.stand
 btmn.upRight = anim8.newAnimation(standUpGrid('1-3',1), {0.1, 0.1, 0.1}, 'pauseAtEnd');
 btmn.upLeft = btmn.upRight:clone():flipH();
 
-local walkRenderOffset = 25;
+local walkRenderOffsetRight = 25;
+local walkRenderOffsetLeft = 15;
 local walkGrid = anim8.newGrid(70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
 btmn.walkRight = anim8.newAnimation(walkGrid('1-16',1), 0.1, 'pauseAtEnd');
 btmn.walkLeft = btmn.walkRight:clone():flipH();
@@ -540,31 +541,31 @@ function btmn:draw()
     btmn.currentState == "turningRight" or btmn.currentState == "turningLeft") then
       btmn.currentAnim:draw(btmn.standImg, 
         btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.y + global.ty + global.offsetY);
   elseif (btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft") then
     btmn.currentAnim:draw(btmn.duckImg, 
         btmn.x + global.tx + global.offsetX - duckRenderOffset, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1); 
+        btmn.y + global.ty + global.offsetY); 
   elseif (btmn.currentState == "standingUpRight" or btmn.currentState == "standingUpLeft") then
     btmn.currentAnim:draw(btmn.standUpImg, 
         btmn.x + global.tx + global.offsetX - standUpRenderOffset, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.y + global.ty + global.offsetY);
   elseif (btmn.currentState == "walkingRight") then
     btmn.currentAnim:draw(btmn.walkImg, 
-        btmn.x + global.tx + global.offsetX - walkRenderOffset, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.x + global.tx + global.offsetX - walkRenderOffsetRight, 
+        btmn.y + global.ty + global.offsetY);
   elseif (btmn.currentState == "toStandRight") then
     btmn.currentAnim:draw(btmn.toStandImg, 
-        btmn.x + global.tx + global.offsetX - walkRenderOffset, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.x + global.tx + global.offsetX - walkRenderOffsetRight, 
+        btmn.y + global.ty + global.offsetY);
   elseif (btmn.currentState == "toStandLeft") then
     btmn.currentAnim:draw(btmn.toStandImg, 
-        btmn.x + global.tx + global.offsetX - 15, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.x + global.tx + global.offsetX - walkRenderOffsetLeft, 
+        btmn.y + global.ty + global.offsetY);
   elseif (btmn.currentState == "walkingLeft") then
     btmn.currentAnim:draw(btmn.walkImg, 
-        btmn.x + global.tx + global.offsetX - 15, 
-        btmn.y + global.ty + global.offsetY, 0, 1, 1);
+        btmn.x + global.tx + global.offsetX - walkRenderOffsetLeft, 
+        btmn.y + global.ty + global.offsetY);
   end
 
   
