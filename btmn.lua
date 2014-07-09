@@ -46,7 +46,7 @@ btmn.convoInput = false;
 btmn.selectedConvoOption = 0;
 
 offset = {x = 0, y = 0};
-btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width,                    height = btmn.height };
+btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width, height = btmn.height };
 
 -- Collision tile variables
 left = 0;
@@ -59,7 +59,6 @@ down = 0;
 -- Requires
 require("rope");
 
-
 -- Animation imgs
 btmn.standImg = love.graphics.newImage("Content/Images/btmnStand.png");
 btmn.duckImg = love.graphics.newImage("Content/Images/btmnDuck.png");
@@ -68,6 +67,7 @@ btmn.walkImg = love.graphics.newImage("Content/Images/btmnWalk.png");
 btmn.toStandImg = love.graphics.newImage("Content/Images/btmnToStand.png");
 
 -- Animations
+local yRenderOffset = 12;
 local standAndTurnRenderOffset = 10;
 local standGrid = anim8.newGrid(50, 64, btmn.standImg:getWidth(), btmn.standImg:getHeight());
 btmn.standRight = anim8.newAnimation(standGrid('1-5',1), {0.7, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
@@ -234,6 +234,9 @@ end
 -- Update
 function btmn:update( dt, colmap, gameSpeed )
   gameSpeed = gameSpeed or 1;
+  local collisionOffset = {x = 0, y = 12};
+  btmn.collisionRect.width = btmn.width;
+  btmn.collisionRect.height = btmn.height;
   
   -- Keep track of old direction
   btmn.oldDirection = btmn.direction;
@@ -249,8 +252,11 @@ function btmn:update( dt, colmap, gameSpeed )
   if not btmn.onRope and btmn.canMove then
     
     if not btmn.ducking then
+      offset.x = 0; -- No offset required!
+      
       if (love.keyboard.isDown("right")) then 
           btmn.direction = RIGHT;
+          collisionOffset.x = 12 * btmn.direction;
           
           if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingRight") then
             btmn.walkRight:gotoFrame(8); --Reset
@@ -275,6 +281,7 @@ function btmn:update( dt, colmap, gameSpeed )
     
       if (love.keyboard.isDown("left")) then 
           btmn.direction = LEFT;
+          collisionOffset.x = 12 * btmn.direction;
           
           if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingLeft") then
             btmn.walkLeft:gotoFrame(8); --Reset
@@ -375,6 +382,9 @@ function btmn:update( dt, colmap, gameSpeed )
         btmn.currentAnim:pauseAtStart(); -- Reset Whatever animation is currently active
       end
       btmn.ducking = true;
+      collisionOffset.x = 10 * btmn.direction;
+      collisionOffset.y = 36;
+      btmn.collisionRect.height = 32;
       
       if (btmn.direction == RIGHT) then
         btmn.currentState = "duckingRight";       
@@ -472,8 +482,8 @@ function btmn:update( dt, colmap, gameSpeed )
   end
   
   -- Update Collision Rectangle
-  btmn.collisionRect.x = (btmn.x + offset.x) + global.offsetX + global.tx;
-  btmn.collisionRect.y = (btmn.y - offset.y) + global.offsetY + global.ty;
+  btmn.collisionRect.x = (btmn.x + offset.x) + global.offsetX + global.tx + collisionOffset.x;
+  btmn.collisionRect.y = (btmn.y - offset.y) + global.offsetY + global.ty + collisionOffset.y;
 end
 --[[ Function ]]--
 -- Update batarangs
@@ -541,31 +551,31 @@ function btmn:draw()
     btmn.currentState == "turningRight" or btmn.currentState == "turningLeft") then
       btmn.currentAnim:draw(btmn.standImg, 
         btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft") then
     btmn.currentAnim:draw(btmn.duckImg, 
         btmn.x + global.tx + global.offsetX - duckRenderOffset, 
-        btmn.y + global.ty + global.offsetY); 
+        btmn.y + global.ty + global.offsetY + yRenderOffset); 
   elseif (btmn.currentState == "standingUpRight" or btmn.currentState == "standingUpLeft") then
     btmn.currentAnim:draw(btmn.standUpImg, 
         btmn.x + global.tx + global.offsetX - standUpRenderOffset, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "walkingRight") then
     btmn.currentAnim:draw(btmn.walkImg, 
         btmn.x + global.tx + global.offsetX - walkRenderOffsetRight, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "toStandRight") then
     btmn.currentAnim:draw(btmn.toStandImg, 
         btmn.x + global.tx + global.offsetX - walkRenderOffsetRight, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "toStandLeft") then
     btmn.currentAnim:draw(btmn.toStandImg, 
         btmn.x + global.tx + global.offsetX - walkRenderOffsetLeft, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "walkingLeft") then
     btmn.currentAnim:draw(btmn.walkImg, 
         btmn.x + global.tx + global.offsetX - walkRenderOffsetLeft, 
-        btmn.y + global.ty + global.offsetY);
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   end
 
   
