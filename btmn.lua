@@ -65,6 +65,8 @@ btmn.duckImg = love.graphics.newImage("Content/Images/btmnDuck.png");
 btmn.standUpImg = love.graphics.newImage("Content/Images/btmnStandUp.png");
 btmn.walkImg = love.graphics.newImage("Content/Images/btmnWalk.png");
 btmn.toStandImg = love.graphics.newImage("Content/Images/btmnToStand.png");
+btmn.standJumpImg = love.graphics.newImage("Content/Images/btmnStandingJump.png");
+btmn.landJumpImg = love.graphics.newImage("Content/Images/btmnLand.png");
 
 -- Animations
 local yRenderOffset = 12;
@@ -104,6 +106,16 @@ btmn.walkLeft = btmn.walkRight:clone():flipH();
 local toStandGrid = anim8.newGrid(70, 64, btmn.toStandImg:getWidth(), btmn.toStandImg:getHeight());
 btmn.toStandRight = anim8.newAnimation(toStandGrid('1-6',1), 0.08, 'pauseAtEnd');
 btmn.toStandLeft = btmn.toStandRight:clone():flipH();
+
+local standingJumpOffset = 20;
+local standingJumpGrid = anim8.newGrid(60, 66, btmn.standJumpImg:getWidth(), btmn.standJumpImg:getHeight());
+btmn.standJumpRight = anim8.newAnimation(standingJumpGrid('1-4',1), {0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.standJumpLeft = btmn.standJumpRight:clone():flipH();
+
+local landingOffset = 25;
+local landingJumpGrid = anim8.newGrid(60, 64, btmn.landJumpImg:getWidth(), btmn.landJumpImg:getHeight());
+btmn.landingRight = anim8.newAnimation(landingJumpGrid('1-3',1), 0.1, 'pauseAtEnd');
+btmn.landingLeft = btmn.landingRight:clone():flipH();
 
 btmn.currentAnim = btmn.standRight;
 
@@ -326,25 +338,21 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.turnRight:pauseAtStart(); -- Reset turning animation
             btmn.currentState = "standingRight";
             btmn.currentAnim = btmn.standRight;   
-            btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
             btmn.turnLeft:pauseAtStart(); -- Reset turning animation
             btmn.currentState = "standingLeft";
             btmn.currentAnim = btmn.standLeft;
-            btmn.currentAnim:resume();
           
           elseif (btmn.currentState == "standingUpRight" and btmn.currentAnim.status == "paused") then
             btmn.upRight:pauseAtStart(); -- Reset standing up animation
             btmn.currentState = "standingRight";
             btmn.currentAnim = btmn.standRight;
-            btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "standingUpLeft" and btmn.currentAnim.status == "paused") then
             btmn.upLeft:pauseAtStart(); -- Reset standing up animation
             btmn.currentState = "standingLeft";
             btmn.currentAnim = btmn.standLeft;
-            btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "walkingRight" or btmn.currentState == "walkingLeft") then
             btmn.walkLeft:pauseAtStart(); -- Reset walking animations
@@ -357,25 +365,56 @@ function btmn:update( dt, colmap, gameSpeed )
                 btmn.currentState = "toStandLeft";
                 btmn.currentAnim = btmn.toStandLeft;
               end
-
-            btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "toStandRight" and btmn.currentAnim.status == "paused") then
             btmn.toStandRight:pauseAtStart(); -- Reset to stand animation
             btmn.currentState = "standingRight";
             btmn.currentAnim = btmn.standRight;
-            btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "toStandLeft" and btmn.currentAnim.status == "paused") then
             btmn.toStandLeft:pauseAtStart(); -- Reset to stand animation
             btmn.currentState = "standingLeft";
             btmn.currentAnim = btmn.standLeft;
-            btmn.currentAnim:resume();
+            
+          elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
+            btmn.landingRight:pauseAtStart(); -- Reset landing animation
+            btmn.currentState = "standingRight";
+            btmn.currentAnim = btmn.standRight;
+          
+          elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
+            btmn.landingLeft:pauseAtStart(); -- Reset landing animation
+            btmn.currentState = "standingLeft";
+            btmn.currentAnim = btmn.standLeft;
           end
+          btmn.currentAnim:resume();
       end
    
       if (btmn.jumping) then
           jump(colmap("Collision Layer"), gameSpeed);     
+          
+          if (btmn.currentState == "standingRight") then
+            btmn.standRight:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "standingJumpRight";
+            btmn.currentAnim = btmn.standJumpRight;
+          elseif (btmn.currentState == "standingLeft") then
+            btmn.standLeft:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "standingJumpLeft";
+            btmn.currentAnim = btmn.standJumpLeft;
+          end
+          
+          btmn.currentAnim:resume();
+      elseif (not btmn.jumping) then
+        if (btmn.currentState == "standingJumpRight") then
+          btmn.standJumpRight:pauseAtStart(); -- Reset standing jump animation
+          btmn.currentState = "landingJumpRight";
+          btmn.currentAnim = btmn.landingRight;
+        elseif (btmn.currentState == "standingJumpLeft") then
+          btmn.standJumpLeft:pauseAtStart(); -- Reset standing jump animation
+          btmn.currentState = "landingJumpLeft";
+          btmn.currentAnim = btmn.landingLeft;
+        end
+        
+        btmn.currentAnim:resume();
       end
     end  
     
@@ -553,6 +592,20 @@ function btmn:draw()
     btmn.currentState == "turningRight" or btmn.currentState == "turningLeft") then
       btmn.currentAnim:draw(btmn.standImg, 
         btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
+  elseif (btmn.currentState == "standingJumpRight" or btmn.currentState == "standingJumpLeft") then
+    btmn.currentAnim:draw(btmn.standJumpImg, 
+        btmn.x + global.tx + global.offsetX - standingJumpOffset, 
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
+  elseif (btmn.currentState == "landingJumpRight"or btmn.currentState == "landingJumpLeft") then
+    if (btmn.currentAnim.position == 3) then 
+      landingOffset = 22;
+    else
+      landingOffset = 25;
+    end
+    
+    btmn.currentAnim:draw(btmn.landJumpImg, 
+        btmn.x + global.tx + global.offsetX - landingOffset, 
         btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft") then
     btmn.currentAnim:draw(btmn.duckImg, 

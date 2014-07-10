@@ -73,7 +73,7 @@ function love.load( arg )
     ----------------------------------------------
     -- Debug
     btmn.x = 32;
-    btmn.y = 256;
+    btmn.y = 224;
     global.tx = 0;
    
     -- Load Global Resources such as Fonts
