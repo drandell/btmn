@@ -73,7 +73,7 @@ local standGrid = anim8.newGrid(50, 64, btmn.standImg:getWidth(), btmn.standImg:
 btmn.standRight = anim8.newAnimation(standGrid('1-5',1), {0.7, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
 btmn.standLeft = btmn.standRight:clone():flipH();
 
-btmn.turnRight = anim8.newAnimation(standGrid('5-1',1), {0.1, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.turnRight = anim8.newAnimation(standGrid('5-1',1), {0.08, 0.08, 0.08, 0.08, 0.08}, 'pauseAtEnd');
 btmn.turnLeft = btmn.turnRight:clone():flipH();
 
 local duckRenderOffset = 15;
@@ -98,11 +98,11 @@ for j = 1, 7 do
   walkQuads[11 + j] = love.graphics.newQuad(772 + ((j-1) * 70), 0, 70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
 end
 
-btmn.walkRight = anim8.newAnimation(walkQuads, 0.3, 'pauseAtEnd');
+btmn.walkRight = anim8.newAnimation(walkQuads, 0.1, 'pauseAtEnd');
 btmn.walkLeft = btmn.walkRight:clone():flipH();
 
 local toStandGrid = anim8.newGrid(70, 64, btmn.toStandImg:getWidth(), btmn.toStandImg:getHeight());
-btmn.toStandRight = anim8.newAnimation(toStandGrid('1-6',1), 0.1, 'pauseAtEnd');
+btmn.toStandRight = anim8.newAnimation(toStandGrid('1-6',1), 0.08, 'pauseAtEnd');
 btmn.toStandLeft = btmn.toStandRight:clone():flipH();
 
 btmn.currentAnim = btmn.standRight;
@@ -280,11 +280,15 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.turnRight:pauseAtStart(); 
             btmn.currentState = "walkingRight";
             btmn.currentAnim = btmn.walkRight;
+          elseif (btmn.direction == RIGHT and btmn.turnLeft.status == "playing") then
+            btmn.turnLeft:pauseAtStart(); 
+            btmn.currentState = "walkingRight";
+            btmn.currentAnim = btmn.walkRight;
           end
           
-          --if (btmn.currentState == "walkingRight") then
-          --  moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          --end
+          if (btmn.currentState == "walkingRight") then
+            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          end
           btmn.currentAnim:resume();
       end
     
@@ -305,15 +309,18 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.turnLeft:pauseAtStart(); 
             btmn.currentState = "walkingLeft";
             btmn.currentAnim = btmn.walkLeft;
+          elseif (btmn.direction == LEFT and btmn.turnRight.status == "playing") then
+            btmn.turnRight:pauseAtStart(); 
+            btmn.currentState = "walkingLeft";
+            btmn.currentAnim = btmn.walkLeft;
           end
           
-          --if (btmn.currentState == "walkingLeft") then
-          --  moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          --end
+          if (btmn.currentState == "walkingLeft") then
+            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          end
           btmn.currentAnim:resume();
       end
       
-      --[[
       if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
           if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
             btmn.turnRight:pauseAtStart(); -- Reset turning animation
@@ -340,32 +347,17 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "walkingRight" or btmn.currentState == "walkingLeft") then
-            -- If we have actually started to run, and the cape is flying in the air, then toStand anim should play
-            -- else we are pretty much still standing
-            if (btmn.currentAnim.position >= 3) then
-              btmn.currentAnim:pauseAtStart();
+            btmn.walkLeft:pauseAtStart(); -- Reset walking animations
+            btmn.walkRight:pauseAtStart();
             
-              if (btmn.direction == RIGHT) then
+            if (btmn.direction == RIGHT) then
                 btmn.currentState = "toStandRight";
                 btmn.currentAnim = btmn.toStandRight;
               elseif (btmn.direction == LEFT) then
                 btmn.currentState = "toStandLeft";
                 btmn.currentAnim = btmn.toStandLeft;
               end
-            else
-              btmn.currentAnim:pauseAtStart();
-              
-              if (btmn.direction == RIGHT) then
-                btmn.currentState = "standingRight";
-                btmn.currentAnim = btmn.standRight;
-              elseif (btmn.direction == LEFT) then
-                btmn.currentState = "standingLeft";
-                btmn.currentAnim = btmn.standLeft;
-              end
-              
-              btmn.currentAnim:resume();
-            end
-            
+
             btmn.currentAnim:resume();
             
           elseif (btmn.currentState == "toStandRight" and btmn.currentAnim.status == "paused") then
@@ -381,7 +373,6 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.currentAnim:resume();
           end
       end
-      ]]--
    
       if (btmn.jumping) then
           jump(colmap("Collision Layer"), gameSpeed);     
