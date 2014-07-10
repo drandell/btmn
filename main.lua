@@ -72,7 +72,7 @@ function love.load( arg )
     
     ----------------------------------------------
     -- Debug
-    btmn.x = 16;
+    btmn.x = 32;
     btmn.y = 256;
     global.tx = 0;
    

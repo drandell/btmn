@@ -9,7 +9,7 @@ menuState = {}
 menuState.logo = nil;
 menuState.logoPos = { x = 0, y = 0 };
 menuState.options = { 
-  {text = "Play Episode #1", implemented = true, gotoState = "sceneOne"}, 
+  {text = "Play Demo", implemented = true, gotoState = "sceneOne"}, 
   {text = "Options", implemented = true, gotoState = "menuOptions"} 
 };
 menuState.currentSelectedOption = 1;

@@ -46,6 +46,7 @@ function debugState:draw()
   love.graphics.print("X: " .. btmn.x, 6, 300);
   love.graphics.print("Y: " .. btmn.y, 6, 310);
   love.graphics.print("Anim: " .. btmn.currentState, 6, 370);
+  love.graphics.print("Anim Frame: " .. btmn.currentAnim.position, 6, 380);
   
   love.graphics.setNewFont(12);
   

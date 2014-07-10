@@ -88,8 +88,17 @@ btmn.upLeft = btmn.upRight:clone():flipH();
 
 local walkRenderOffsetRight = 25;
 local walkRenderOffsetLeft = 15;
-local walkGrid = anim8.newGrid(70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
-btmn.walkRight = anim8.newAnimation(walkGrid('1-16',1), 0.1, 'pauseAtEnd');
+local walkQuads = {};
+
+for i = 1, 18 do
+  walkQuads[i] = love.graphics.newQuad(0 + ((i-1) * 70), 0, 70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
+end
+walkQuads[11] = love.graphics.newQuad(700, 0, 72, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
+for j = 1, 7 do
+  walkQuads[11 + j] = love.graphics.newQuad(772 + ((j-1) * 70), 0, 70, 64, btmn.walkImg:getWidth(), btmn.walkImg:getHeight());
+end
+
+btmn.walkRight = anim8.newAnimation(walkQuads, 0.3, 'pauseAtEnd');
 btmn.walkLeft = btmn.walkRight:clone():flipH();
 
 local toStandGrid = anim8.newGrid(70, 64, btmn.toStandImg:getWidth(), btmn.toStandImg:getHeight());
@@ -259,7 +268,7 @@ function btmn:update( dt, colmap, gameSpeed )
           collisionOffset.x = 12 * btmn.direction;
           
           if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingRight") then
-            btmn.walkRight:gotoFrame(8); --Reset
+            btmn.walkRight:gotoFrame(9); --Reset
           end
                  
           if (btmn.oldDirection == LEFT) then
@@ -273,9 +282,9 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.currentAnim = btmn.walkRight;
           end
           
-          if (btmn.currentState == "walkingRight") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          end
+          --if (btmn.currentState == "walkingRight") then
+          --  moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          --end
           btmn.currentAnim:resume();
       end
     
@@ -284,7 +293,7 @@ function btmn:update( dt, colmap, gameSpeed )
           collisionOffset.x = 12 * btmn.direction;
           
           if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingLeft") then
-            btmn.walkLeft:gotoFrame(8); --Reset
+            btmn.walkLeft:gotoFrame(9); --Reset
           end
           
           if (btmn.oldDirection == RIGHT) then
@@ -298,12 +307,13 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.currentAnim = btmn.walkLeft;
           end
           
-          if (btmn.currentState == "walkingLeft") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          end
+          --if (btmn.currentState == "walkingLeft") then
+          --  moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+          --end
           btmn.currentAnim:resume();
       end
-    
+      
+      --[[
       if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
           if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
             btmn.turnRight:pauseAtStart(); -- Reset turning animation
@@ -371,6 +381,7 @@ function btmn:update( dt, colmap, gameSpeed )
             btmn.currentAnim:resume();
           end
       end
+      ]]--
    
       if (btmn.jumping) then
           jump(colmap("Collision Layer"), gameSpeed);     
