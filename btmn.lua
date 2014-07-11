@@ -613,7 +613,7 @@ function btmn:update( dt, colmap, gameSpeed )
     
     btmn.blocking = false;
   end
-  --[[
+  
   if (btmn.throwingBatarang) then   
     if (btmn.currentState ~= "throwingBatarangRight" and btmn.currentState ~= "throwingBatarangLeft") then
       btmn.currentAnim:pauseAtStart(); --Reset whatever animation is currently running
@@ -652,22 +652,24 @@ function btmn:update( dt, colmap, gameSpeed )
         end
         
         btmn.activeBatarangs = btmn.activeBatarangs + 1;
-        btmn.throwingBatarang = false;
       end
+    
+    if (btmn.currentAnim.status == "paused") then
+      if (btmn.currentState == "throwingBatarangRight") then
+        btmn.throwRight:pauseAtStart(); -- Reset throwing animation
+        btmn.currentState = "standingRight";
+        btmn.currentAnim = btmn.standRight;   
+      elseif (btmn.currentState == "throwingBatarangLeft") then
+        btmn.throwLeft:pauseAtStart(); -- Reset throwing animation
+        btmn.currentState = "standingLeft";
+        btmn.currentAnim = btmn.standLeft;
+      end
+    
+      btmn.canMove = true;
+      btmn.throwingBatarang = false;
+    end
   end
-  
-  if (btmn.currentState == "throwingBatarangRight" and btmn.currentAnim.status == "paused") then
-    btmn.throwRight:pauseAtStart(); -- Reset throwing animation
-    btmn.currentState = "standingRight";
-    btmn.currentAnim = btmn.standRight;   
-    btmn.canMove = true;
-  elseif (btmn.currentState == "throwingBatarangLeft" and btmn.currentAnim.status == "paused") then
-    btmn.throwLeft:pauseAtStart(); -- Reset throwing animation
-    btmn.currentState = "standingLeft";
-    btmn.currentAnim = btmn.standLeft;
-    btmn.canMove = true;
-  end
-]]--
+
   -- btmn Collision Update
   if (colmap("Messages Layer")) then
       for i, obj in pairs( colmap("Messages Layer").objects ) do
