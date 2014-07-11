@@ -70,6 +70,7 @@ btmn.toStandImg = love.graphics.newImage("Content/Images/btmnToStand.png");
 btmn.standJumpImg = love.graphics.newImage("Content/Images/btmnStandingJump.png");
 btmn.landJumpImg = love.graphics.newImage("Content/Images/btmnLand.png");
 btmn.lookUpImg = love.graphics.newImage("Content/Images/btmnLookup.png");
+btmn.blockImg = love.graphics.newImage("Content/Images/btmnBlock.png");
 
 -- Animations
 local yRenderOffset = 12;
@@ -123,6 +124,12 @@ btmn.landingLeft = btmn.landingRight:clone():flipH();
 local lookUpGrid = anim8.newGrid(50, 64, btmn.lookUpImg:getWidth(), btmn.lookUpImg:getHeight());
 btmn.lookUpRight = anim8.newAnimation(lookUpGrid('1-3',1), 0.08, 'pauseAtEnd');
 btmn.lookUpLeft = btmn.lookUpRight:clone():flipH();
+
+local blockGrid = anim8.newGrid(50, 64, btmn.blockImg:getWidth(), btmn.blockImg:getHeight());
+btmn.toBlockRight = anim8.newAnimation(standGrid('5-1',1), 0.06, 'pauseAtEnd');
+btmn.toBlockLeft = btmn.toBlockRight:clone():flipH();
+btmn.blockRight = anim8.newAnimation(blockGrid('1-4',1), {0.08, 0.08, 0.1, 0.1}, 'pauseAtEnd');
+btmn.blockLeft = btmn.blockRight:clone():flipH();
 
 btmn.currentAnim = btmn.standRight;
 
@@ -279,7 +286,7 @@ function btmn:update( dt, colmap, gameSpeed )
   -- btmn Movement Update
   if not btmn.onRope and btmn.canMove then
     
-    if not btmn.ducking then
+    if not btmn.ducking and not btmn.blocking then
       offset.x = 0; -- No offset required!
       
       if (love.keyboard.isDown("up")) then      
@@ -547,6 +554,67 @@ function btmn:update( dt, colmap, gameSpeed )
     end
   end
   
+  if (love.keyboard.isDown("c") and not btmn.blocking) then
+    btmn.blocking = true;
+    
+    if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
+      -- Quickening Animation, we skip the long pause on the first frame
+      if (btmn.currentAnim.position == 1) then 
+        btmn.standRight:gotoFrame(2); 
+      end 
+      
+      if (btmn.direction == RIGHT) then
+        btmn.standRight:pauseAtStart(); -- Reset standing animation
+        btmn.currentState = "turningRight";
+        btmn.currentAnim = btmn.toBlockRight;
+      elseif (btmn.direction == LEFT) then
+        btmn.standLeft:pauseAtStart(); -- Reset standing animation
+        btmn.currentState = "turningLeft";
+        btmn.currentAnim = btmn.toBlockLeft;
+      end
+    end    
+    
+    btmn.currentAnim:resume();
+  elseif (love.keyboard.isDown("c") and btmn.blocking) then
+    if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
+      btmn.turnRight:pauseAtStart(); -- Reset turning animation
+      btmn.currentState = "blockingRight";
+      btmn.currentAnim = btmn.blockRight;
+    elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
+      btmn.turnLeft:pauseAtStart(); -- Reset turning animation
+      btmn.currentState = "blockingLeft";
+      btmn.currentAnim = btmn.blockLeft;
+    end
+    
+    btmn.currentAnim:resume();
+    
+    if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
+      if (btmn.currentAnim.position >= 2) then
+        btmn.currentAnim:gotoFrame(2);
+      end
+    end
+  end
+  
+  if (not love.keyboard.isDown("c")) then
+    if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
+      if (btmn.currentAnim.position >= 4) then
+        btmn.currentAnim:pauseAtStart(); -- Reset whatever blocking animation we have
+          
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "standingRight";
+          btmn.currentAnim = btmn.standRight;   
+          btmn.currentAnim:resume();
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "standingLeft";
+          btmn.currentAnim = btmn.standLeft;
+          btmn.currentAnim:resume();
+        end
+      end
+    end
+    
+    btmn.blocking = false;
+  end
+
   -- btmn Collision Update
   if (colmap("Messages Layer")) then
       for i, obj in pairs( colmap("Messages Layer").objects ) do
@@ -664,6 +732,10 @@ function btmn:draw()
         btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "lookingUpRight" or btmn.currentState == "lookingUpLeft") then
     btmn.currentAnim:draw(btmn.lookUpImg, 
+        btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
+  elseif (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
+    btmn.currentAnim:draw(btmn.blockImg, 
         btmn.x + global.tx + global.offsetX - standAndTurnRenderOffset, 
         btmn.y + global.ty + global.offsetY + yRenderOffset);
   elseif (btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft") then
