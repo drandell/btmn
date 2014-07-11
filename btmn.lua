@@ -35,6 +35,7 @@ btmn.currentAnim = nil;
 btmn.canMove = true;
 btmn.jumping = false;
 btmn.ducking = false;
+btmn.blocking = false;
 
 -- Rope bools
 btmn.collidingWithRope = false;
@@ -49,6 +50,7 @@ offset = {x = 0, y = 0};
 btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width, height = btmn.height };
 
 -- Collision tile variables
+-- TODO: Make Local when not debugging!
 left = 0;
 right = 0;
 up = 0;
@@ -127,11 +129,11 @@ btmn.currentAnim = btmn.standRight;
 --[[ Local Function ]]--
 -- Bounding box collision
 function boxCollision( x, y, width, height )
-	if (btmn.collisionRect.x + btmn.width > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
-		return true;
-	else
-		return false;
-	end
+  if (btmn.collisionRect.x + btmn.width > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
+    return true;
+  else
+    return false;
+  end
 end
 --[[ Local Function ]]--
 -- Half width bounding box collision detection
@@ -155,14 +157,14 @@ end
 -- Get btmn corners on tilemap
 function getBtmnCorners( x, y )
   down = math.floor(( (y - offset.y) + btmn.height - 1) / global.tSize);
-	up = math.floor( (y - offset.y) / global.tSize); --+1
+  up = math.floor( (y - offset.y) / global.tSize); --+1
   
   middleY = math.floor((y - offset.y + (btmn.height / 2)) / global.tSize);
   middleX = math.ceil((x - offset.x + (btmn.width / 2)) / global.tSize);
 	
   -- Hopefully sorted!
   left = math.floor( (x - offset.x) / global.tSize) + 1;
-	right = math.ceil(( (x - offset.x) + btmn.width - 1) / global.tSize);
+  right = math.ceil(( (x - offset.x) + btmn.width - 1) / global.tSize);
 end
 --[[ Local Function ]]--
 -- Jump function, makes btmn jump
@@ -492,9 +494,7 @@ function btmn:update( dt, colmap, gameSpeed )
         btmn.currentAnim:resume();
       end
       
-      -- TODO: Add Collision Rect change code as we duck, our collision rect will get smaller
     elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
-      --TODO: Implement standing up animations
       if (btmn.currentAnim.status == "paused") then
         -- Fully ducked, stand up animation
         btmn.currentAnim:pauseAtStart(); -- Reset Whatever ducking animation is currently active
