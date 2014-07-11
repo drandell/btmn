@@ -11,7 +11,6 @@ local RIGHT = 1;
 btmn = {};
 
 -- Attributes
-btmn.debugImg = love.graphics.newImage("Content/Images/test.png");
 btmn.height = 64;
 btmn.width = 32;
 btmn.x = 20;
