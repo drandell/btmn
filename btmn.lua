@@ -83,14 +83,14 @@ btmn.standLeft = btmn.standRight:clone():flipH();
 btmn.turnRight = anim8.newAnimation(standGrid('5-1',1), {0.08, 0.08, 0.08, 0.08, 0.08}, 'pauseAtEnd');
 btmn.turnLeft = btmn.turnRight:clone():flipH();
 
-local duckRenderOffset = 18;
+local duckRenderOffset = 15;
 local duckGrid = anim8.newGrid(60, 64, btmn.duckImg:getWidth(), btmn.duckImg:getHeight());
 btmn.duckRight = anim8.newAnimation(duckGrid('1-7',1), 0.1, 'pauseAtEnd');
 btmn.duckLeft = btmn.duckRight:clone():flipH();
 
 local standUpRenderOffset = 15;
 local standUpGrid = anim8.newGrid(60, 64, btmn.standUpImg:getWidth(), btmn.standUpImg:getHeight());
-btmn.upRight = anim8.newAnimation(standUpGrid('1-3',1), {0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.upRight = anim8.newAnimation(standUpGrid('1-3',1), 0.1, 'pauseAtEnd');
 btmn.upLeft = btmn.upRight:clone():flipH();
 
 local walkRenderOffsetRight = 25;
