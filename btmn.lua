@@ -627,7 +627,7 @@ function btmn:update( dt, colmap, gameSpeed )
       btmn.currentAnim:resume();
     end
     
-      if (btmn.activeBatarangs < btmn.maxNumberOfBatarangs and btmn.currentAnim.position >= 3) then
+      if (btmn.currentAnim.position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
         if (btmn.currentState == "throwingBatarangRight") then
            btmn.batarangs[btmn.activeBatarangs+1] = {
              x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
@@ -710,53 +710,50 @@ function btmn:updateBatarangs( enemy , gameSpeed )
   local BATARANG_SPD = 6;
   local BATARANG_DMG = 20;
   
-  if (enemy.state ~= "knockout") then
-    for i, batarang in pairs( btmn.batarangs ) do
-      if (batarang.active) then
-        batarang.angle = batarang.angle + 5;
-        
-        if (batarang.angle > 360) then
-          batarang.angle = 0;
-        end
+  for i, batarang in pairs( btmn.batarangs ) do
+    if (batarang.active) then
+      batarang.angle = batarang.angle + 5;
+      
+      if (batarang.angle > 360) then
+        batarang.angle = 0;
+      end
 
-        if (batarang.dir == "left") then
-            batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
-        elseif (batarang.dir == "right") then
-            batarang.x = batarang.x + (BATARANG_SPD * gameSpeed);
-        end
+      if (batarang.dir == "left") then
+          batarang.x = batarang.x - (BATARANG_SPD * gameSpeed);
+      elseif (batarang.dir == "right") then
+          batarang.x = batarang.x + (BATARANG_SPD * gameSpeed);
+      end
 
-        if (batarang.x + btmn.batarangImg:getWidth() * 2 > global.gameWorldWidth) then
+      if (batarang.x > global.gameWorldWidth + btmn.batarangImg:getWidth()) then
+        batarang.active = false;
+        btmn.activeBatarangs = btmn.activeBatarangs - 1;
+      elseif (batarang.x + btmn.batarangImg:getWidth() < 0) then
+        batarang.active = false;
+        btmn.activeBatarangs = btmn.activeBatarangs - 1;
+      end
+      
+      -- Check Collision Against Enemies
+      if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
+        and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
+        and (batarang.y + batarang.height + global.ty > enemy.y) 
+        and (batarang.y < enemy.y + enemy.height and enemy.state ~= "knockout") then
+          enemy.health = enemy.health - BATARANG_DMG;
           batarang.active = false;
           btmn.activeBatarangs = btmn.activeBatarangs - 1;
-        elseif (batarang.x < 0) then
-          batarang.active = false;
-          btmn.activeBatarangs = btmn.activeBatarangs - 1;
-        end
-        
-        -- Check Collision Against Enemies
-        if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
-          and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
-          and (batarang.y + batarang.height + global.ty > enemy.y) 
-          and (batarang.y < enemy.y + enemy.height) then
-            enemy.health = enemy.health - BATARANG_DMG;
-            batarang.active = false;
-            btmn.activeBatarangs = btmn.activeBatarangs - 1;
-            global.targetedEnemy = enemy;
-            -- If Player is too far away then here we should probably
-            -- Have a check to see if the next state makes the enemy cautious 
-            -- And not immediately go to the next state but for now it'll do.
-            -- But he should defiantly be stunned for a bit
-            if (enemy.nxtState == "speak") then
-                enemy.state = enemy.nxtState;
-                enemy.nxtState = "stunned"; 
-            else
-                -- TODO: Not yet implemented
-                if (enemy.nxtState == "stunned") then
-                  enemy.state = "actioned";
-                end
-            end
-        end
-        
+          global.targetedEnemy = enemy;
+          -- If Player is too far away then here we should probably
+          -- Have a check to see if the next state makes the enemy cautious 
+          -- And not immediately go to the next state but for now it'll do.
+          -- But he should defiantly be stunned for a bit
+          if (enemy.nxtState == "speak") then
+              enemy.state = enemy.nxtState;
+              enemy.nxtState = "stunned"; 
+          else
+              -- TODO: Not yet implemented
+              if (enemy.nxtState == "stunned") then
+                enemy.state = "actioned";
+              end
+          end
       end
     end
   end
@@ -904,7 +901,7 @@ function btmn:keypressed( key, unicode )
     end
     
     -- Throw Batarang(s)!
-    if (key == "q" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang) then
+    if (key == "q" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
         btmn.canMove = false;
         btmn.throwingBatarang = true;
       end
