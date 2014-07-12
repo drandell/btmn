@@ -83,9 +83,9 @@ btmn.standLeft = btmn.standRight:clone():flipH();
 btmn.turnRight = anim8.newAnimation(standGrid('5-1',1), {0.08, 0.08, 0.08, 0.08, 0.08}, 'pauseAtEnd');
 btmn.turnLeft = btmn.turnRight:clone():flipH();
 
-local duckRenderOffset = 15;
+local duckRenderOffset = 18;
 local duckGrid = anim8.newGrid(60, 64, btmn.duckImg:getWidth(), btmn.duckImg:getHeight());
-btmn.duckRight = anim8.newAnimation(duckGrid('1-6',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.1}, 'pauseAtEnd');
+btmn.duckRight = anim8.newAnimation(duckGrid('1-7',1), 0.1, 'pauseAtEnd');
 btmn.duckLeft = btmn.duckRight:clone():flipH();
 
 local standUpRenderOffset = 15;
@@ -504,33 +504,34 @@ function btmn:update( dt, colmap, gameSpeed )
         btmn.currentAnim = btmn.duckLeft;
       end
       
+      btmn.currentAnim:resume();
     elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
       if (btmn.currentAnim.status == "paused") then
         -- Fully ducked, stand up animation
-        btmn.currentAnim:pauseAtStart(); -- Reset Whatever ducking animation is currently active
-      
         if (btmn.direction == RIGHT) then
+          btmn.duckRight:pauseAtStart();
           btmn.currentState = "standingUpRight";       
           btmn.currentAnim = btmn.upRight;
         elseif (btmn.direction == LEFT) then
+          btmn.duckLeft:pauseAtStart();
           btmn.currentState = "standingUpLeft";       
           btmn.currentAnim = btmn.upLeft;
         end
-        
       else
-        -- We have not fully ducked, just revert back to standing
-        btmn.currentAnim:pauseAtStart(); -- Reset Whatever ducking animation is currently active
-        
+        -- We have not fully ducked, just revert back to standing       
         if (btmn.direction == RIGHT) then
+          btmn.duckRight:pauseAtStart();
           btmn.currentState = "standingRight";
           btmn.currentAnim = btmn.standRight;   
         elseif (btmn.direction == LEFT) then
+          btmn.duckLeft:pauseAtStart();
           btmn.currentState = "standingLeft";
           btmn.currentAnim = btmn.standLeft;
         end
       end
       
-      btmn.ducking = false;
+      btmn.currentAnim:resume();
+      btmn.ducking = false;      
     end
   elseif btmn.onRope and not btmn.ducking then
     -- Check to see if btmn can climb &
