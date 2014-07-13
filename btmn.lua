@@ -32,6 +32,7 @@ btmn.maxNumberOfBatarangs = 1;
 btmn.currentState = "standingRight";
 btmn.currentAnim = nil;
 btmn.canMove = true;
+btmn.dead = false;
 btmn.jumping = false;
 btmn.ducking = false;
 btmn.blocking = false;
@@ -72,6 +73,7 @@ btmn.landJumpImg = love.graphics.newImage("Content/Images/btmnLand.png");
 btmn.lookUpImg = love.graphics.newImage("Content/Images/btmnLookup.png");
 btmn.blockImg = love.graphics.newImage("Content/Images/btmnBlock.png");
 btmn.throwBatarangImg = love.graphics.newImage("Content/Images/btmnBatarang.png");
+btmn.deathJumpImg = love.graphics.newImage("Content/Images/btmnDeathJump.png");
 
 -- Animations
 local yRenderOffset = 12;
@@ -137,6 +139,11 @@ local throwBatarangGrid = anim8.newGrid(60, 64, btmn.throwBatarangImg:getWidth()
 btmn.throwRight = anim8.newAnimation(throwBatarangGrid('1-7',1), 0.09, 'pauseAtEnd');
 btmn.throwLeft = btmn.throwRight:clone():flipH();
 
+local deathJumpOffset = 25;
+local deathJumpGrid = anim8.newGrid(70, 64, btmn.deathJumpImg:getWidth(), btmn.deathJumpImg:getHeight());
+btmn.deathJumpRight = anim8.newAnimation(deathJumpGrid('1-5',1), 0.1, 'pauseAtEnd');
+btmn.deathJumpLeft = btmn.deathJumpRight:clone():flipH();
+
 btmn.currentAnim = btmn.standRight;
 
 --[[ Local Function ]]--
@@ -182,7 +189,7 @@ end
 --[[ Local Function ]]--
 -- Jump function, makes btmn jump
 function jump( colMap, gSpeed, grav )
-grav = 0.45 or grav;
+grav = grav or 0.45;
 collisionMap = colMap;
 btmn.speedY = (btmn.speedY - grav * gSpeed);
 
@@ -268,7 +275,28 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
         btmn.speedY = -1;
       end
     end 
-    
+  else
+    if (btmn.dead) then
+      if btmn.speedY > 0 then
+        btmn.y = (btmn.y + (btmn.speedY * diry) * gSpeed); 
+      elseif btmn.speedY < 0 then
+        btmn.y = (btmn.y - (btmn.speedY * diry) * gSpeed); 
+      end
+      
+      -- Get btmn Tile Corners
+      getBtmnCorners(btmn.x, btmn.y);
+      
+      if (diry == 1) then
+        if (collisionMap:get(left, down) == nil and collisionMap:get(right, down) == nil
+          and collisionMap:get(middleX, down) == nil) then
+        else
+          btmn.y = (down * global.tSize) - (btmn.height - offset.y);
+          btmn.jumping = false;
+          btmn.speedY = 0;
+        end
+      end
+      
+    end --[[ btmn.dead ]]--
   end
 end
 --[[ Function ]]--
@@ -290,386 +318,413 @@ function btmn:update( dt, colmap, gameSpeed )
   checkCollisionWithRope(colmap);
   
   -- btmn Movement Update
-  if not btmn.onRope and btmn.canMove then
-    
-    if not btmn.ducking and not btmn.blocking then
-      offset.x = 0; -- No offset required!
+  if not btmn.dead then
+    if not btmn.onRope and btmn.canMove then
       
-      if (love.keyboard.isDown("up")) then      
-        if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
-          if (btmn.direction == RIGHT) then
-            -- Quickening Animation, we skip the long pause on the first frame
-            if (btmn.currentAnim.position == 1) then 
-              btmn.standRight:gotoFrame(2); 
-            end 
-          
-            if (btmn.currentAnim.status == "paused") then
-              btmn.standRight:pauseAtStart(); -- Reset standing animation
-              btmn.currentState = "lookingUpRight";
-              btmn.currentAnim = btmn.lookUpRight;
-            end
-          elseif (btmn.direction == LEFT) then
-            -- Quickening Animation, we skip the long pause on the first frame
-            if (btmn.currentAnim.position == 1) then 
-              btmn.standLeft:gotoFrame(2); 
-            end 
-          
-            if (btmn.currentAnim.status == "paused") then
-              btmn.standLeft:pauseAtStart(); -- Reset standing animation
-              btmn.currentState = "lookingUpLeft";
-              btmn.currentAnim = btmn.lookUpLeft;
-            end
-          end
-          
-          btmn.currentAnim:resume();
-        elseif (btmn.currentState == "lookingUpRight" or btmn.currentState == "lookingUpLeft") then
-          -- We've reached look-up frame, stay on it
-          if (btmn.currentAnim.position >= 2) then
-            btmn.currentAnim:gotoFrame(2);
-          end
-        end
-      elseif (not love.keyboard.isDown("up")) then  
-        if (btmn.lookUpRight.position >= 3 and btmn.currentState == "lookingUpRight" and btmn.lookUpRight.status == "paused") then
-          btmn.lookUpRight:pauseAtStart() -- Reset lookup animation
-          btmn.currentState = "turningRight";
-          btmn.currentAnim = btmn.armsUpRight;
-          btmn.currentAnim:resume();
-        elseif (btmn.lookUpLeft.position >= 3 and btmn.currentState == "lookingUpLeft" and btmn.lookUpLeft.status == "paused") then
-          btmn.lookUpLeft:pauseAtStart() -- Reset lookup animation
-          btmn.currentState = "turningLeft";
-          btmn.currentAnim = btmn.armsUpLeft;
-          btmn.currentAnim:resume();
-        end
-      end
-      
-      if (love.keyboard.isDown("right")) then 
-          btmn.direction = RIGHT;
-          collisionOffset.x = 12 * btmn.direction;
-          
-          if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingRight") then
-            btmn.walkRight:gotoFrame(9); --Loop
-          end
-                 
-          if (btmn.oldDirection == LEFT) then
-            btmn.standRight:pauseAtStart(); -- Reset standing animation
-            btmn.currentState = "turningRight";
-            btmn.currentAnim = btmn.turnRight;
-          elseif (btmn.turnRight.status == "paused" or btmn.turnRight.position >= 2 or btmn.currentState == "standingRight" or btmn.currentState == "lookingUpRight") then
-            btmn.standRight:pauseAtStart(); -- Reset standing animation
-            btmn.lookUpRight:pauseAtStart();
-            btmn.turnRight:pauseAtStart(); 
-            btmn.currentState = "walkingRight";
-            btmn.currentAnim = btmn.walkRight;
-          elseif (btmn.direction == RIGHT and btmn.turnLeft.status == "playing") then
-            btmn.turnLeft:pauseAtStart(); 
-            btmn.currentState = "walkingRight";
-            btmn.currentAnim = btmn.walkRight;
-          end
-          
-          if (btmn.currentState == "walkingRight") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          end
-          btmn.currentAnim:resume();
-      end
-    
-      if (love.keyboard.isDown("left")) then 
-          btmn.direction = LEFT;
-          collisionOffset.x = 12 * btmn.direction;
-          
-          if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingLeft") then
-            btmn.walkLeft:gotoFrame(9); --Loop
-          end
-          
-          if (btmn.oldDirection == RIGHT) then
-            btmn.standLeft:pauseAtStart(); -- Reset standing animation
-            btmn.currentState = "turningLeft";
-            btmn.currentAnim = btmn.turnLeft;
-          elseif (btmn.turnLeft.status == "paused" or btmn.turnLeft.position >= 2 or btmn.currentState == "standingLeft" or btmn.currentState == "lookingUpLeft") then
-            btmn.standLeft:pauseAtStart(); -- Reset standing animation
-            btmn.lookUpLeft:pauseAtStart();
-            btmn.turnLeft:pauseAtStart(); 
-            btmn.currentState = "walkingLeft";
-            btmn.currentAnim = btmn.walkLeft;
-          elseif (btmn.direction == LEFT and btmn.turnRight.status == "playing") then
-            btmn.turnRight:pauseAtStart(); 
-            btmn.currentState = "walkingLeft";
-            btmn.currentAnim = btmn.walkLeft;
-          end
-          
-          if (btmn.currentState == "walkingLeft") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
-          end
-          btmn.currentAnim:resume();
-      end
-      
-      if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
-          if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
-            btmn.turnRight:pauseAtStart(); -- Reset turning animation
-            btmn.armsUpRight:pauseAtStart(); -- Reset faster turning animation
-            btmn.currentState = "standingRight";
-            btmn.currentAnim = btmn.standRight;   
-            
-          elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
-            btmn.turnLeft:pauseAtStart(); -- Reset turning animation
-            btmn.armsUpLeft:pauseAtStart(); -- Reset faster turning animation
-            btmn.currentState = "standingLeft";
-            btmn.currentAnim = btmn.standLeft;
-          
-          elseif (btmn.currentState == "standingUpRight" and btmn.currentAnim.status == "paused") then
-            btmn.upRight:pauseAtStart(); -- Reset standing up animation
-            btmn.currentState = "standingRight";
-            btmn.currentAnim = btmn.standRight;
-            
-          elseif (btmn.currentState == "standingUpLeft" and btmn.currentAnim.status == "paused") then
-            btmn.upLeft:pauseAtStart(); -- Reset standing up animation
-            btmn.currentState = "standingLeft";
-            btmn.currentAnim = btmn.standLeft;
-            
-          elseif (btmn.currentState == "walkingRight" or btmn.currentState == "walkingLeft") then
-            btmn.walkLeft:pauseAtStart(); -- Reset walking animations
-            btmn.walkRight:pauseAtStart();
-            
+      if not btmn.ducking and not btmn.blocking then
+        offset.x = 0; -- No offset required!
+        
+        if (love.keyboard.isDown("up")) then      
+          if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
             if (btmn.direction == RIGHT) then
-                btmn.currentState = "toStandRight";
-                btmn.currentAnim = btmn.toStandRight;
-              elseif (btmn.direction == LEFT) then
-                btmn.currentState = "toStandLeft";
-                btmn.currentAnim = btmn.toStandLeft;
+              -- Quickening Animation, we skip the long pause on the first frame
+              if (btmn.currentAnim.position == 1) then 
+                btmn.standRight:gotoFrame(2); 
+              end 
+            
+              if (btmn.currentAnim.status == "paused") then
+                btmn.standRight:pauseAtStart(); -- Reset standing animation
+                btmn.currentState = "lookingUpRight";
+                btmn.currentAnim = btmn.lookUpRight;
               end
+            elseif (btmn.direction == LEFT) then
+              -- Quickening Animation, we skip the long pause on the first frame
+              if (btmn.currentAnim.position == 1) then 
+                btmn.standLeft:gotoFrame(2); 
+              end 
             
-          elseif (btmn.currentState == "toStandRight" and btmn.currentAnim.status == "paused") then
-            btmn.toStandRight:pauseAtStart(); -- Reset to stand animation
-            btmn.currentState = "standingRight";
-            btmn.currentAnim = btmn.standRight;
+              if (btmn.currentAnim.status == "paused") then
+                btmn.standLeft:pauseAtStart(); -- Reset standing animation
+                btmn.currentState = "lookingUpLeft";
+                btmn.currentAnim = btmn.lookUpLeft;
+              end
+            end
             
-          elseif (btmn.currentState == "toStandLeft" and btmn.currentAnim.status == "paused") then
-            btmn.toStandLeft:pauseAtStart(); -- Reset to stand animation
-            btmn.currentState = "standingLeft";
-            btmn.currentAnim = btmn.standLeft;
-            
-          elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
-            btmn.landingRight:pauseAtStart(); -- Reset landing animation
-            btmn.currentState = "standingRight";
-            btmn.currentAnim = btmn.standRight;
-          
-          elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
-            btmn.landingLeft:pauseAtStart(); -- Reset landing animation
-            btmn.currentState = "standingLeft";
-            btmn.currentAnim = btmn.standLeft;
+            btmn.currentAnim:resume();
+          elseif (btmn.currentState == "lookingUpRight" or btmn.currentState == "lookingUpLeft") then
+            -- We've reached look-up frame, stay on it
+            if (btmn.currentAnim.position >= 2) then
+              btmn.currentAnim:gotoFrame(2);
+            end
           end
-          
-          btmn.currentAnim:resume();
-      end
-   
-      if (btmn.jumping) then
-          jump(colmap("Collision Layer"), gameSpeed);     
-          
-          if (btmn.currentState == "standingRight") then
-            btmn.standRight:pauseAtStart(); -- Reset standing animation
-            btmn.currentState = "standingJumpRight";
-            btmn.currentAnim = btmn.standJumpRight;
-          elseif (btmn.currentState == "standingLeft") then
-            btmn.standLeft:pauseAtStart(); -- Reset standing animation
-            btmn.currentState = "standingJumpLeft";
-            btmn.currentAnim = btmn.standJumpLeft;
+        elseif (not love.keyboard.isDown("up")) then  
+          if (btmn.lookUpRight.position >= 3 and btmn.currentState == "lookingUpRight" and btmn.lookUpRight.status == "paused") then
+            btmn.lookUpRight:pauseAtStart() -- Reset lookup animation
+            btmn.currentState = "turningRight";
+            btmn.currentAnim = btmn.armsUpRight;
+            btmn.currentAnim:resume();
+          elseif (btmn.lookUpLeft.position >= 3 and btmn.currentState == "lookingUpLeft" and btmn.lookUpLeft.status == "paused") then
+            btmn.lookUpLeft:pauseAtStart() -- Reset lookup animation
+            btmn.currentState = "turningLeft";
+            btmn.currentAnim = btmn.armsUpLeft;
+            btmn.currentAnim:resume();
           end
-          
-      elseif (not btmn.jumping) then
-        if (btmn.currentState == "standingJumpRight") then
-          btmn.standJumpRight:pauseAtStart(); -- Reset standing jump animation
-          btmn.currentState = "landingJumpRight";
-          btmn.currentAnim = btmn.landingRight;
-        elseif (btmn.currentState == "standingJumpLeft") then
-          btmn.standJumpLeft:pauseAtStart(); -- Reset standing jump animation
-          btmn.currentState = "landingJumpLeft";
-          btmn.currentAnim = btmn.landingLeft;
-        end
-      end
-    end  
-    
-    if (love.keyboard.isDown("down")) then
-      if (not btmn.ducking) then
-        btmn.currentAnim:pauseAtStart(); -- Reset Whatever animation is currently active
-      end
-      btmn.ducking = true;
-      collisionOffset.x = 10 * btmn.direction;
-      collisionOffset.y = 36;
-      btmn.collisionRect.height = 32;
-      
-      if (btmn.direction == RIGHT) then
-        btmn.currentState = "duckingRight";       
-        btmn.currentAnim = btmn.duckRight;
-      elseif (btmn.direction == LEFT) then
-        btmn.currentState = "duckingLeft";       
-        btmn.currentAnim = btmn.duckLeft;
-      end
-      
-      btmn.currentAnim:resume();
-    elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
-      if (btmn.currentAnim.status == "paused") then
-        -- Fully ducked, stand up animation
-        if (btmn.direction == RIGHT) then
-          btmn.duckRight:pauseAtStart();
-          btmn.currentState = "standingUpRight";       
-          btmn.currentAnim = btmn.upRight;
-        elseif (btmn.direction == LEFT) then
-          btmn.duckLeft:pauseAtStart();
-          btmn.currentState = "standingUpLeft";       
-          btmn.currentAnim = btmn.upLeft;
-        end
-      else
-        -- We have not fully ducked, just revert back to standing       
-        if (btmn.direction == RIGHT) then
-          btmn.duckRight:pauseAtStart();
-          btmn.currentState = "standingRight";
-          btmn.currentAnim = btmn.standRight;   
-        elseif (btmn.direction == LEFT) then
-          btmn.duckLeft:pauseAtStart();
-          btmn.currentState = "standingLeft";
-          btmn.currentAnim = btmn.standLeft;
-        end
-      end
-      
-      btmn.currentAnim:resume();
-      btmn.ducking = false;      
-    end
-  elseif btmn.onRope and not btmn.ducking then
-    -- Check to see if btmn can climb &
-    -- Check to see if btmn can exit rope!
-    --btmn.currentAnim = btmn.climb;
-    
-    if (love.keyboard.isDown("up") and canMoveUpRope()) then
-      btmn.y = btmn.y - 2;
-    elseif not canMoveUpRope() then
-      if (love.keyboard.isDown("left") or love.keyboard.isDown("right")) then 
-        btmn.onRope = false;
-      end
-    end
-    
-    if (love.keyboard.isDown("down") and canMoveDownRope()) then
-      btmn.y = btmn.y + 2;
-    elseif not canMoveDownRope() then
-      if (love.keyboard.isDown("left") or love.keyboard.isDown("right")) then 
-        btmn.onRope = false;
-      end
-    end
-  end
-  
-  if (love.keyboard.isDown("c") and not btmn.blocking) then
-    btmn.blocking = true;
-    
-    if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
-      -- Quickening Animation, we skip the long pause on the first frame
-      if (btmn.currentAnim.position == 1) then 
-        btmn.standRight:gotoFrame(2); 
-      end 
-      
-      if (btmn.direction == RIGHT) then
-        btmn.standRight:pauseAtStart(); -- Reset standing animation
-        btmn.currentState = "turningRight";
-        btmn.currentAnim = btmn.armsUpRight;
-      elseif (btmn.direction == LEFT) then
-        btmn.standLeft:pauseAtStart(); -- Reset standing animation
-        btmn.currentState = "turningLeft";
-        btmn.currentAnim = btmn.armsUpLeft;
-      end
-    end    
-    
-    btmn.currentAnim:resume();
-  elseif (love.keyboard.isDown("c") and btmn.blocking) then
-    if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
-      btmn.armsUpRight:pauseAtStart(); -- Reset turning animation
-      btmn.currentState = "blockingRight";
-      btmn.currentAnim = btmn.blockRight;
-    elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
-      btmn.armsUpLeft:pauseAtStart(); -- Reset turning animation
-      btmn.currentState = "blockingLeft";
-      btmn.currentAnim = btmn.blockLeft;
-    end
-    
-    if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
-      if (btmn.currentAnim.position >= 2) then
-        btmn.currentAnim:gotoFrame(2);
-      end
-    end
-    
-    btmn.currentAnim:resume();
-  end
-  
-  if (not love.keyboard.isDown("c")) then
-    if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
-      if (btmn.currentAnim.position >= 4) then
-        btmn.currentAnim:pauseAtStart(); -- Reset whatever blocking animation we have
-          
-        if (btmn.direction == RIGHT) then
-          btmn.currentState = "standingRight";
-          btmn.currentAnim = btmn.standRight;   
-        elseif (btmn.direction == LEFT) then
-          btmn.currentState = "standingLeft";
-          btmn.currentAnim = btmn.standLeft;
-        end
-      end
-    end
-    
-    btmn.blocking = false;
-  end
-  
-  if (btmn.throwingBatarang) then   
-    if (btmn.currentState ~= "throwingBatarangRight" and btmn.currentState ~= "throwingBatarangLeft") then
-      btmn.currentAnim:pauseAtStart(); --Reset whatever animation is currently running
-      
-      if (btmn.direction == RIGHT) then
-        btmn.currentState = "throwingBatarangRight";
-        btmn.currentAnim = btmn.throwRight;
-      elseif (btmn.direction == LEFT) then
-        btmn.currentState = "throwingBatarangLeft";
-        btmn.currentAnim = btmn.throwLeft;
-      end
-      btmn.currentAnim:resume();
-    end
-    
-      if (btmn.currentAnim.position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
-        if (btmn.currentState == "throwingBatarangRight") then
-           btmn.batarangs[btmn.activeBatarangs+1] = {
-             x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
-             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
-             width = btmn.batarangImg:getWidth(),
-             height = btmn.batarangImg:getHeight(),
-             active = true, 
-             angle = 0,
-             dir = "right"
-           };
-        elseif (btmn.currentState == "throwingBatarangLeft") then
-           btmn.batarangs[btmn.activeBatarangs+1] = {
-             x = btmn.collisionRect.x - global.offsetX - (btmn.batarangImg:getWidth() * 2), 
-             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
-             width = btmn.batarangImg:getWidth(),
-             height = btmn.batarangImg:getHeight(),
-             active = true, 
-             angle = 0,
-             dir = "left"
-           };
         end
         
-        btmn.activeBatarangs = btmn.activeBatarangs + 1;
+        if (love.keyboard.isDown("right")) then 
+            btmn.direction = RIGHT;
+            collisionOffset.x = 12 * btmn.direction;
+            
+            if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingRight") then
+              btmn.walkRight:gotoFrame(9); --Loop
+            end
+                   
+            if (btmn.oldDirection == LEFT) then
+              btmn.standRight:pauseAtStart(); -- Reset standing animation
+              btmn.currentState = "turningRight";
+              btmn.currentAnim = btmn.turnRight;
+            elseif (btmn.turnRight.status == "paused" or btmn.turnRight.position >= 2 or btmn.currentState == "standingRight" or btmn.currentState == "lookingUpRight") then
+              btmn.standRight:pauseAtStart(); -- Reset standing animation
+              btmn.lookUpRight:pauseAtStart();
+              btmn.turnRight:pauseAtStart(); 
+              btmn.currentState = "walkingRight";
+              btmn.currentAnim = btmn.walkRight;
+            elseif (btmn.direction == RIGHT and btmn.turnLeft.status == "playing") then
+              btmn.turnLeft:pauseAtStart(); 
+              btmn.currentState = "walkingRight";
+              btmn.currentAnim = btmn.walkRight;
+            end
+            
+            if (btmn.currentState == "walkingRight") then
+              moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+            end
+            btmn.currentAnim:resume();
+        end
+      
+        if (love.keyboard.isDown("left")) then 
+            btmn.direction = LEFT;
+            collisionOffset.x = 12 * btmn.direction;
+            
+            if (btmn.currentAnim.status == "paused" and btmn.currentState == "walkingLeft") then
+              btmn.walkLeft:gotoFrame(9); --Loop
+            end
+            
+            if (btmn.oldDirection == RIGHT) then
+              btmn.standLeft:pauseAtStart(); -- Reset standing animation
+              btmn.currentState = "turningLeft";
+              btmn.currentAnim = btmn.turnLeft;
+            elseif (btmn.turnLeft.status == "paused" or btmn.turnLeft.position >= 2 or btmn.currentState == "standingLeft" or btmn.currentState == "lookingUpLeft") then
+              btmn.standLeft:pauseAtStart(); -- Reset standing animation
+              btmn.lookUpLeft:pauseAtStart();
+              btmn.turnLeft:pauseAtStart(); 
+              btmn.currentState = "walkingLeft";
+              btmn.currentAnim = btmn.walkLeft;
+            elseif (btmn.direction == LEFT and btmn.turnRight.status == "playing") then
+              btmn.turnRight:pauseAtStart(); 
+              btmn.currentState = "walkingLeft";
+              btmn.currentAnim = btmn.walkLeft;
+            end
+            
+            if (btmn.currentState == "walkingLeft") then
+              moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+            end
+            btmn.currentAnim:resume();
+        end
+        
+        if (not love.keyboard.isDown("left") and not love.keyboard.isDown("right")) then 
+            if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
+              btmn.turnRight:pauseAtStart(); -- Reset turning animation
+              btmn.armsUpRight:pauseAtStart(); -- Reset faster turning animation
+              btmn.currentState = "standingRight";
+              btmn.currentAnim = btmn.standRight;   
+              
+            elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
+              btmn.turnLeft:pauseAtStart(); -- Reset turning animation
+              btmn.armsUpLeft:pauseAtStart(); -- Reset faster turning animation
+              btmn.currentState = "standingLeft";
+              btmn.currentAnim = btmn.standLeft;
+            
+            elseif (btmn.currentState == "standingUpRight" and btmn.currentAnim.status == "paused") then
+              btmn.upRight:pauseAtStart(); -- Reset standing up animation
+              btmn.currentState = "standingRight";
+              btmn.currentAnim = btmn.standRight;
+              
+            elseif (btmn.currentState == "standingUpLeft" and btmn.currentAnim.status == "paused") then
+              btmn.upLeft:pauseAtStart(); -- Reset standing up animation
+              btmn.currentState = "standingLeft";
+              btmn.currentAnim = btmn.standLeft;
+              
+            elseif (btmn.currentState == "walkingRight" or btmn.currentState == "walkingLeft") then
+              btmn.walkLeft:pauseAtStart(); -- Reset walking animations
+              btmn.walkRight:pauseAtStart();
+              
+              if (btmn.direction == RIGHT) then
+                  btmn.currentState = "toStandRight";
+                  btmn.currentAnim = btmn.toStandRight;
+                elseif (btmn.direction == LEFT) then
+                  btmn.currentState = "toStandLeft";
+                  btmn.currentAnim = btmn.toStandLeft;
+                end
+              
+            elseif (btmn.currentState == "toStandRight" and btmn.currentAnim.status == "paused") then
+              btmn.toStandRight:pauseAtStart(); -- Reset to stand animation
+              btmn.currentState = "standingRight";
+              btmn.currentAnim = btmn.standRight;
+              
+            elseif (btmn.currentState == "toStandLeft" and btmn.currentAnim.status == "paused") then
+              btmn.toStandLeft:pauseAtStart(); -- Reset to stand animation
+              btmn.currentState = "standingLeft";
+              btmn.currentAnim = btmn.standLeft;
+              
+            elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
+              btmn.landingRight:pauseAtStart(); -- Reset landing animation
+              btmn.currentState = "standingRight";
+              btmn.currentAnim = btmn.standRight;
+            
+            elseif (btmn.currentState == "landingJumpRight" and btmn.currentAnim.status == "paused") then
+              btmn.landingLeft:pauseAtStart(); -- Reset landing animation
+              btmn.currentState = "standingLeft";
+              btmn.currentAnim = btmn.standLeft;
+            end
+            
+            btmn.currentAnim:resume();
+        end
+     
+        if (btmn.jumping) then
+            jump(colmap("Collision Layer"), gameSpeed);     
+            
+            if (btmn.currentState == "standingRight") then
+              btmn.standRight:pauseAtStart(); -- Reset standing animation
+              btmn.currentState = "standingJumpRight";
+              btmn.currentAnim = btmn.standJumpRight;
+            elseif (btmn.currentState == "standingLeft") then
+              btmn.standLeft:pauseAtStart(); -- Reset standing animation
+              btmn.currentState = "standingJumpLeft";
+              btmn.currentAnim = btmn.standJumpLeft;
+            end
+            
+        elseif (not btmn.jumping) then
+          if (btmn.currentState == "standingJumpRight") then
+            btmn.standJumpRight:pauseAtStart(); -- Reset standing jump animation
+            btmn.currentState = "landingJumpRight";
+            btmn.currentAnim = btmn.landingRight;
+          elseif (btmn.currentState == "standingJumpLeft") then
+            btmn.standJumpLeft:pauseAtStart(); -- Reset standing jump animation
+            btmn.currentState = "landingJumpLeft";
+            btmn.currentAnim = btmn.landingLeft;
+          end
+        end
+      end  
+      
+      if (love.keyboard.isDown("down")) then
+        if (not btmn.ducking) then
+          btmn.currentAnim:pauseAtStart(); -- Reset Whatever animation is currently active
+        end
+        btmn.ducking = true;
+        collisionOffset.x = 10 * btmn.direction;
+        collisionOffset.y = 36;
+        btmn.collisionRect.height = 32;
+        
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "duckingRight";       
+          btmn.currentAnim = btmn.duckRight;
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "duckingLeft";       
+          btmn.currentAnim = btmn.duckLeft;
+        end
+        
+        btmn.currentAnim:resume();
+      elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
+        if (btmn.currentAnim.status == "paused") then
+          -- Fully ducked, stand up animation
+          if (btmn.direction == RIGHT) then
+            btmn.duckRight:pauseAtStart();
+            btmn.currentState = "standingUpRight";       
+            btmn.currentAnim = btmn.upRight;
+          elseif (btmn.direction == LEFT) then
+            btmn.duckLeft:pauseAtStart();
+            btmn.currentState = "standingUpLeft";       
+            btmn.currentAnim = btmn.upLeft;
+          end
+        else
+          -- We have not fully ducked, just revert back to standing       
+          if (btmn.direction == RIGHT) then
+            btmn.duckRight:pauseAtStart();
+            btmn.currentState = "standingRight";
+            btmn.currentAnim = btmn.standRight;   
+          elseif (btmn.direction == LEFT) then
+            btmn.duckLeft:pauseAtStart();
+            btmn.currentState = "standingLeft";
+            btmn.currentAnim = btmn.standLeft;
+          end
+        end
+        
+        btmn.currentAnim:resume();
+        btmn.ducking = false;      
       end
-    
-    if (btmn.currentAnim.status == "paused") then
-      if (btmn.currentState == "throwingBatarangRight") then
-        btmn.throwRight:pauseAtStart(); -- Reset throwing animation
-        btmn.currentState = "standingRight";
-        btmn.currentAnim = btmn.standRight;   
-      elseif (btmn.currentState == "throwingBatarangLeft") then
-        btmn.throwLeft:pauseAtStart(); -- Reset throwing animation
-        btmn.currentState = "standingLeft";
-        btmn.currentAnim = btmn.standLeft;
+    elseif btmn.onRope and not btmn.ducking then
+      -- Check to see if btmn can climb &
+      -- Check to see if btmn can exit rope!
+      --btmn.currentAnim = btmn.climb;
+      
+      if (love.keyboard.isDown("up") and canMoveUpRope()) then
+        btmn.y = btmn.y - 2;
+      elseif not canMoveUpRope() then
+        if (love.keyboard.isDown("left") or love.keyboard.isDown("right")) then 
+          btmn.onRope = false;
+        end
       end
+      
+      if (love.keyboard.isDown("down") and canMoveDownRope()) then
+        btmn.y = btmn.y + 2;
+      elseif not canMoveDownRope() then
+        if (love.keyboard.isDown("left") or love.keyboard.isDown("right")) then 
+          btmn.onRope = false;
+        end
+      end
+    end --[[ not btmn.onRope and btmn.canMove ]]--
     
-      btmn.canMove = true;
-      btmn.throwingBatarang = false;
+    if (love.keyboard.isDown("c") and not btmn.blocking) then
+      btmn.blocking = true;
+      
+      if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
+        -- Quickening Animation, we skip the long pause on the first frame
+        if (btmn.currentAnim.position == 1) then 
+          btmn.standRight:gotoFrame(2); 
+        end 
+        
+        if (btmn.direction == RIGHT) then
+          btmn.standRight:pauseAtStart(); -- Reset standing animation
+          btmn.currentState = "turningRight";
+          btmn.currentAnim = btmn.armsUpRight;
+        elseif (btmn.direction == LEFT) then
+          btmn.standLeft:pauseAtStart(); -- Reset standing animation
+          btmn.currentState = "turningLeft";
+          btmn.currentAnim = btmn.armsUpLeft;
+        end
+      end    
+      
+      btmn.currentAnim:resume();
+    elseif (love.keyboard.isDown("c") and btmn.blocking) then
+      if (btmn.currentState == "turningRight" and btmn.currentAnim.status == "paused") then
+        btmn.armsUpRight:pauseAtStart(); -- Reset turning animation
+        btmn.currentState = "blockingRight";
+        btmn.currentAnim = btmn.blockRight;
+      elseif (btmn.currentState == "turningLeft" and btmn.currentAnim.status == "paused") then
+        btmn.armsUpLeft:pauseAtStart(); -- Reset turning animation
+        btmn.currentState = "blockingLeft";
+        btmn.currentAnim = btmn.blockLeft;
+      end
+      
+      if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
+        if (btmn.currentAnim.position >= 2) then
+          btmn.currentAnim:gotoFrame(2);
+        end
+      end
+      
+      btmn.currentAnim:resume();
+    end
+    
+    if (not love.keyboard.isDown("c")) then
+      if (btmn.currentState == "blockingRight" or btmn.currentState == "blockingLeft") then
+        if (btmn.currentAnim.position >= 4) then
+          btmn.currentAnim:pauseAtStart(); -- Reset whatever blocking animation we have
+            
+          if (btmn.direction == RIGHT) then
+            btmn.currentState = "standingRight";
+            btmn.currentAnim = btmn.standRight;   
+          elseif (btmn.direction == LEFT) then
+            btmn.currentState = "standingLeft";
+            btmn.currentAnim = btmn.standLeft;
+          end
+        end
+      end
+      
+      btmn.blocking = false;
+    end
+    
+    if (btmn.throwingBatarang) then   
+      if (btmn.currentState ~= "throwingBatarangRight" and btmn.currentState ~= "throwingBatarangLeft") then
+        btmn.currentAnim:pauseAtStart(); --Reset whatever animation is currently running
+        
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "throwingBatarangRight";
+          btmn.currentAnim = btmn.throwRight;
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "throwingBatarangLeft";
+          btmn.currentAnim = btmn.throwLeft;
+        end
+        btmn.currentAnim:resume();
+      end
+      
+        if (btmn.currentAnim.position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
+          if (btmn.currentState == "throwingBatarangRight") then
+             btmn.batarangs[btmn.activeBatarangs+1] = {
+               x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
+               y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
+               width = btmn.batarangImg:getWidth(),
+               height = btmn.batarangImg:getHeight(),
+               active = true, 
+               angle = 0,
+               dir = "right"
+             };
+          elseif (btmn.currentState == "throwingBatarangLeft") then
+             btmn.batarangs[btmn.activeBatarangs+1] = {
+               x = btmn.collisionRect.x - global.offsetX - (btmn.batarangImg:getWidth() * 2), 
+               y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
+               width = btmn.batarangImg:getWidth(),
+               height = btmn.batarangImg:getHeight(),
+               active = true, 
+               angle = 0,
+               dir = "left"
+             };
+          end
+          
+          btmn.activeBatarangs = btmn.activeBatarangs + 1;
+        end
+      
+      if (btmn.currentAnim.status == "paused") then
+        if (btmn.currentState == "throwingBatarangRight") then
+          btmn.throwRight:pauseAtStart(); -- Reset throwing animation
+          btmn.currentState = "standingRight";
+          btmn.currentAnim = btmn.standRight;   
+        elseif (btmn.currentState == "throwingBatarangLeft") then
+          btmn.throwLeft:pauseAtStart(); -- Reset throwing animation
+          btmn.currentState = "standingLeft";
+          btmn.currentAnim = btmn.standLeft;
+        end
+      
+        btmn.canMove = true;
+        btmn.throwingBatarang = false;
+      end --[[ btmn.currentAnim.position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs ]]--
+    end
+    
+    if (btmn.health <= 0) then
+      btmn.dead = true;
+      btmn.speedY = 8;
+      btmn.jumping = true;
+      btmn.currentAnim:pauseAtStart(); -- Reset current animation
+    end   
+  end --[[ not btmn.dead ]]--
+  
+  if (btmn.dead) then
+    if (btmn.jumping) then
+      local LEFT_BOUNDARY = 16;
+      jump(colmap("Collision Layer"), gameSpeed);  
+      btmn.x = btmn.x - 1 * btmn.direction; 
+      
+      if (btmn.x < LEFT_BOUNDARY) then btmn.x = LEFT_BOUNDARY; end --[[ btmn.x < LEFT_BOUNDARY, stop player leaving game screen when dying]]--
+    end
+    
+    if (btmn.direction == RIGHT and btmn.currentState ~= "deathJumpingRight") then
+      btmn.currentState = "deathJumpingRight";
+      btmn.currentAnim = btmn.deathJumpRight;   
+    elseif (btmn.direction == LEFT and btmn.currentState ~= "deathJumpingLeft") then
+      btmn.currentState = "deathJumpingLeft";
+      btmn.currentAnim = btmn.deathJumpLeft;
     end
   end
-
+  
   -- btmn Collision Update
   if (colmap("Messages Layer")) then
       for i, obj in pairs( colmap("Messages Layer").objects ) do
@@ -829,6 +884,10 @@ function btmn:draw()
     btmn.currentAnim:draw(btmn.walkImg, 
         btmn.x + global.tx + global.offsetX - walkRenderOffsetLeft, 
         btmn.y + global.ty + global.offsetY + yRenderOffset);
+  elseif (btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft") then    
+    btmn.currentAnim:draw(btmn.deathJumpImg, 
+        btmn.x + global.tx + global.offsetX - deathJumpOffset, 
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
   end
 
   
@@ -846,14 +905,15 @@ function btmn:draw()
   
   -- Temp Health Bar & Map Information 
   -- TODO: Move to a UI implementation
-  love.graphics.setColor(black);
-  love.graphics.rectangle("fill", global.offsetX + 4, global.offsetY + 5, 74, 12); 
-  for i = 0, btmn.health / 20 do
-    love.graphics.setColor(red);
-    love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
-    love.graphics.reset();
-  end
-  
+  if (btmn.health > 0) then
+    love.graphics.setColor(black);
+    love.graphics.rectangle("fill", global.offsetX + 5, global.offsetY + 5, (btmn.health / 20) * 14 + 2, 12); 
+    for i = 0, btmn.health / 20 do
+      love.graphics.setColor(red);
+      love.graphics.rectangle("fill", global.offsetX + 6 + i*10 + (i*2), global.offsetY + 6, 10, 10); 
+      love.graphics.reset();
+    end
+  end --[[ btmn.health > 0 ]]--
   
   -- UI Elements (seperate out)
   -- Add different font for scene name, to make it look comic like.

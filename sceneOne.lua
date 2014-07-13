@@ -80,11 +80,11 @@ function sceneOne:draw()
       enemy:draw();
     end
     
-    -- Draw overlay
-    love.graphics.draw(overlay, 0, 0);
-    
     -- Draw BTMN
     btmn.draw();
+    
+    -- Draw overlay
+    love.graphics.draw(overlay, 0, 0);
     
     -- Draw UI Border 
     -- TODO: Move to UI implementation
@@ -98,6 +98,7 @@ end
 -- KeyPressed
 function sceneOne:keypressed( key, unicode )
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
+  if (key == "f2") then btmn.health = 0; end
   
   btmn:keypressed(key, unicode);
 end
