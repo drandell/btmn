@@ -74,6 +74,7 @@ btmn.lookUpImg = love.graphics.newImage("Content/Images/btmnLookup.png");
 btmn.blockImg = love.graphics.newImage("Content/Images/btmnBlock.png");
 btmn.throwBatarangImg = love.graphics.newImage("Content/Images/btmnBatarang.png");
 btmn.deathJumpImg = love.graphics.newImage("Content/Images/btmnDeathJump.png");
+btmn.deathLandImg = love.graphics.newImage("Content/Images/btmnDeathLand.png");
 
 -- Animations
 local yRenderOffset = 12;
@@ -141,8 +142,19 @@ btmn.throwLeft = btmn.throwRight:clone():flipH();
 
 local deathJumpOffset = 25;
 local deathJumpGrid = anim8.newGrid(70, 64, btmn.deathJumpImg:getWidth(), btmn.deathJumpImg:getHeight());
-btmn.deathJumpRight = anim8.newAnimation(deathJumpGrid('1-5',1), 0.1, 'pauseAtEnd');
+btmn.deathJumpRight = anim8.newAnimation(deathJumpGrid('1-5',1), 0.15, 'pauseAtEnd');
 btmn.deathJumpLeft = btmn.deathJumpRight:clone():flipH();
+
+local deathLandOffset = 25;
+local deathLandQuads = {};
+
+for i = 1, 5 do
+  deathLandQuads[i] = love.graphics.newQuad(0 + ((i-1) * 70), 0, 70, 64, btmn.deathLandImg:getWidth(), btmn.deathLandImg:getHeight());
+end
+deathLandQuads[6] = love.graphics.newQuad(350, 0, 72, 64, btmn.deathLandImg:getWidth(), btmn.deathLandImg:getHeight());
+deathLandQuads[7] = love.graphics.newQuad(422, 0, 72, 64, btmn.deathLandImg:getWidth(), btmn.deathLandImg:getHeight());
+btmn.deathLandRight = anim8.newAnimation(deathLandQuads, 0.15, 'pauseAtEnd');
+btmn.deathLandLeft = btmn.deathLandRight:clone():flipH();
 
 btmn.currentAnim = btmn.standRight;
 
@@ -716,14 +728,24 @@ function btmn:update( dt, colmap, gameSpeed )
       if (btmn.x < LEFT_BOUNDARY) then btmn.x = LEFT_BOUNDARY; end --[[ btmn.x < LEFT_BOUNDARY, stop player leaving game screen when dying]]--
     end
     
-    if (btmn.direction == RIGHT and btmn.currentState ~= "deathJumpingRight") then
-      btmn.currentState = "deathJumpingRight";
-      btmn.currentAnim = btmn.deathJumpRight;   
-    elseif (btmn.direction == LEFT and btmn.currentState ~= "deathJumpingLeft") then
-      btmn.currentState = "deathJumpingLeft";
-      btmn.currentAnim = btmn.deathJumpLeft;
+    if (btmn.direction == RIGHT and btmn.currentState ~= "deathJumpingRight" and btmn.currentState ~= "deathLandingRight") then
+        btmn.currentState = "deathJumpingRight";
+        btmn.currentAnim = btmn.deathJumpRight;   
+      elseif (btmn.direction == LEFT and btmn.currentState ~= "deathJumpingLeft" and btmn.currentState ~= "deathLandingLeft") then
+        btmn.currentState = "deathJumpingLeft";
+        btmn.currentAnim = btmn.deathJumpLeft;
     end
-  end
+    
+    if (btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft") then
+      if (btmn.direction == RIGHT and btmn.currentAnim.status == "paused") then
+        btmn.currentState = "deathLandingRight";
+        btmn.currentAnim = btmn.deathLandRight;
+      elseif (btmn.direction == LEFT and btmn.currentAnim.status == "paused") then
+        btmn.currentState = "deathLandingLeft";
+        btmn.currentAnim = btmn.deathLandLeft;
+      end
+    end
+  end --[[ btmn.dead ]]--
   
   -- btmn Collision Update
   if (colmap("Messages Layer")) then
@@ -887,6 +909,10 @@ function btmn:draw()
   elseif (btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft") then    
     btmn.currentAnim:draw(btmn.deathJumpImg, 
         btmn.x + global.tx + global.offsetX - deathJumpOffset, 
+        btmn.y + global.ty + global.offsetY + yRenderOffset);
+  elseif (btmn.currentState == "deathLandingRight" or btmn.currentState == "deathLandingLeft") then
+    btmn.currentAnim:draw(btmn.deathLandImg, 
+        btmn.x + global.tx + global.offsetX - deathLandOffset, 
         btmn.y + global.ty + global.offsetY + yRenderOffset);
   end
 
