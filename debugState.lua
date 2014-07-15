@@ -45,6 +45,7 @@ function debugState:draw()
   love.graphics.print("Scroll X: " .. global.tx, 6, 280);
   love.graphics.print("X: " .. btmn.x, 6, 300);
   love.graphics.print("Y: " .. btmn.y, 6, 310);
+  love.graphics.print("Health: " .. btmn.health, 6, 290);
   love.graphics.print("Anim: " .. btmn.currentState, 6, 370);
   love.graphics.print("Anim Frame: " .. btmn.currentAnim[1].position, 6, 380);
   love.graphics.print("Anim Status: " .. btmn.currentAnim[1].status, 150, 380);

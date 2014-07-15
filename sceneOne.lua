@@ -37,6 +37,9 @@ end
 
 -- Enable
 function sceneOne:enable()
+  if (not isStateEnabled("UI")) then
+    enableState("UI");
+  end
 end
 
 -- Disable
@@ -98,7 +101,7 @@ end
 -- KeyPressed
 function sceneOne:keypressed( key, unicode )
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
-  if (key == "f2") then btmn.health = 0; end
+  if (key == "f2") then btmn.health = btmn.health - 20; end
   
   btmn:keypressed(key, unicode);
 end

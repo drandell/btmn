@@ -40,6 +40,7 @@ btmn = require "btmn";
 
 -- States
 require("debugState");
+require("gameUI");
 --require("testState");
 require("menuState");
 require("menuOptionsState");
@@ -64,6 +65,7 @@ function love.load( arg )
     --addState(testState, "test");
     addState(sceneOne, "sceneOne");
     addState(debugState, "debug");
+    addState(gameUI, "UI");
    
     -- Enable States
     enableState("menu");
