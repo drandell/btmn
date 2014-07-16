@@ -74,6 +74,7 @@ btmn.blockImg = love.graphics.newImage("Content/Images/btmnBlock.png");
 btmn.throwBatarangImg = love.graphics.newImage("Content/Images/btmnBatarang.png");
 btmn.deathJumpImg = love.graphics.newImage("Content/Images/btmnDeathJump.png");
 btmn.deathLandImg = love.graphics.newImage("Content/Images/btmnDeathLand.png");
+btmn.punchImg = love.graphics.newImage("Content/Images/btmnPunch.png");
 
 -- Animations
 local standGrid = anim8.newGrid(50, 64, btmn.standImg:getWidth(), btmn.standImg:getHeight());
@@ -143,6 +144,10 @@ deathLandQuads[6] = love.graphics.newQuad(350, 0, 72, 64, btmn.deathLandImg:getW
 deathLandQuads[7] = love.graphics.newQuad(422, 0, 72, 64, btmn.deathLandImg:getWidth(), btmn.deathLandImg:getHeight());
 btmn.deathLandRight = {anim8.newAnimation(deathLandQuads, 0.15, 'pauseAtEnd'), img = btmn.deathLandImg};
 btmn.deathLandLeft = {btmn.deathLandRight[1]:clone():flipH(), img = btmn.deathLandImg};
+
+local punchGrid = anim8.newGrid(60, 64, btmn.punchImg:getWidth(), btmn.punchImg:getHeight());
+btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1), 0.1, 'pauseAtEnd'), img = btmn.punchImg};
+btmn.punchLeft = {btmn.punchRight[1]:clone():flipH(), img = btmn.punchImg};
 
 btmn.currentAnim = btmn.standRight;
 
@@ -825,7 +830,8 @@ function btmn:draw()
     btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft" or 
     btmn.currentState == "standingUpRight" or btmn.currentState == "standingUpLeft" or
     btmn.currentState == "throwingBatarangRight" or btmn.currentState == "throwingBatarangLeft" or
-    btmn.currentState == "standingJumpRight" or btmn.currentState == "standingJumpLeft") then
+    btmn.currentState == "standingJumpRight" or btmn.currentState == "standingJumpLeft" or
+    btmn.currentState == "punchingRight" or btmn.currentState == "punchingLeft") then
     currentXOffset = 15;
   elseif (btmn.currentState == "walkingRight" or btmn.currentState == "toStandRight" or
     btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft" or
