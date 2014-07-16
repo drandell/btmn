@@ -147,7 +147,7 @@ btmn.deathLandRight = {anim8.newAnimation(deathLandQuads, 0.15, 'pauseAtEnd'), i
 btmn.deathLandLeft = {btmn.deathLandRight[1]:clone():flipH(), img = btmn.deathLandImg};
 
 local punchGrid = anim8.newGrid(60, 64, btmn.punchImg:getWidth(), btmn.punchImg:getHeight());
-btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1, '5-1',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.08, 0.08, 0.08, 0.08, 0.08}, 'pauseAtEnd'), img = btmn.punchImg};
+btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1, '2-1',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.08, 0.08}, 'pauseAtEnd'), img = btmn.punchImg};
 btmn.punchLeft = {btmn.punchRight[1]:clone():flipH(), img = btmn.punchImg};
 
 btmn.currentAnim = btmn.standRight;
@@ -871,11 +871,17 @@ function btmn:draw()
     btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft" or
     btmn.currentState == "deathLandingRight" or btmn.currentState == "deathLandingLeft") then
     currentXOffset = 25;
-  elseif (btmn.currentState == "landingJumpRight"or btmn.currentState == "landingJumpLeft") then
+  elseif (btmn.currentState == "landingJumpRight" or btmn.currentState == "landingJumpLeft") then
     if (btmn.currentAnim[1].position == 3) then 
       currentXOffset = 22;
     else
       currentXOffset = 25;
+    end
+  elseif (btmn.currentState == "punchingRight" or btmn.currentState == "punchingLeft") then
+    if (btmn.currentAnim[1].position <=  3 or btmn.currentAnim[1].position >= 6) then
+      currentXOffset = 15;
+    else
+      currentXOffset = 5;
     end
   end
   
