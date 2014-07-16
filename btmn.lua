@@ -37,6 +37,7 @@ btmn.jumping = false;
 btmn.ducking = false;
 btmn.blocking = false;
 btmn.throwingBatarang = false;
+btmn.punching = false;
 
 -- Rope bools
 --btmn.collidingWithRope = false;
@@ -146,7 +147,7 @@ btmn.deathLandRight = {anim8.newAnimation(deathLandQuads, 0.15, 'pauseAtEnd'), i
 btmn.deathLandLeft = {btmn.deathLandRight[1]:clone():flipH(), img = btmn.deathLandImg};
 
 local punchGrid = anim8.newGrid(60, 64, btmn.punchImg:getWidth(), btmn.punchImg:getHeight());
-btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1), 0.1, 'pauseAtEnd'), img = btmn.punchImg};
+btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1, '5-1',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.08, 0.08, 0.08, 0.08, 0.08}, 'pauseAtEnd'), img = btmn.punchImg};
 btmn.punchLeft = {btmn.punchRight[1]:clone():flipH(), img = btmn.punchImg};
 
 btmn.currentAnim = btmn.standRight;
@@ -520,6 +521,7 @@ function btmn:update( dt, colmap, gameSpeed )
           btmn.currentAnim[1]:resume();
         end
       end --[[ btmn.jumping end ]]--
+      
     end  --[[ not btmn.ducking and not btmn.blocking end ]]--
     
     if (love.keyboard.isDown("down")) then
@@ -635,62 +637,6 @@ function btmn:update( dt, colmap, gameSpeed )
       
       btmn.blocking = false;
     end
-  
-    if (btmn.throwingBatarang) then   
-      if (btmn.currentState ~= "throwingBatarangRight" and btmn.currentState ~= "throwingBatarangLeft") then
-        btmn.currentAnim[1]:pauseAtStart(); --Reset whatever animation is currently running
-        
-        if (btmn.direction == RIGHT) then
-          btmn.currentState = "throwingBatarangRight";
-          btmn.currentAnim = btmn.throwRight;
-        elseif (btmn.direction == LEFT) then
-          btmn.currentState = "throwingBatarangLeft";
-          btmn.currentAnim = btmn.throwLeft;
-        end
-        btmn.currentAnim[1]:resume();
-      end
-      
-      if (btmn.currentAnim[1].position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
-        if (btmn.currentState == "throwingBatarangRight") then
-           btmn.batarangs[btmn.activeBatarangs+1] = {
-             x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
-             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
-             width = btmn.batarangImg:getWidth(),
-             height = btmn.batarangImg:getHeight(),
-             active = true, 
-             angle = 0,
-             dir = "right"
-           };
-        elseif (btmn.currentState == "throwingBatarangLeft") then
-           btmn.batarangs[btmn.activeBatarangs+1] = {
-             x = btmn.collisionRect.x - global.offsetX - (btmn.batarangImg:getWidth() * 2), 
-             y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
-             width = btmn.batarangImg:getWidth(),
-             height = btmn.batarangImg:getHeight(),
-             active = true, 
-             angle = 0,
-             dir = "left"
-           };
-        end
-          
-        btmn.activeBatarangs = btmn.activeBatarangs + 1;
-      end --[[ btmn.currentAnim[1].position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs end ]]--
-    end --[[ btmn.throwingBatarang end ]]
-    
-    if (btmn.currentAnim[1].status == "paused") then
-      if (btmn.currentState == "throwingBatarangRight") then
-        btmn.throwRight[1]:pauseAtStart(); -- Reset throwing animation
-        btmn.currentState = "standingRight";
-        btmn.currentAnim = btmn.standRight;   
-      elseif (btmn.currentState == "throwingBatarangLeft") then
-        btmn.throwLeft[1]:pauseAtStart(); -- Reset throwing animation
-        btmn.currentState = "standingLeft";
-        btmn.currentAnim = btmn.standLeft;
-      end
-    
-      btmn.canMove = true;
-      btmn.throwingBatarang = false;
-    end --[[ btmn.currentAnim[1].status == "paused" end ]]--
     
     if (btmn.health <= 0) then
       btmn.dead = true;
@@ -698,8 +644,97 @@ function btmn:update( dt, colmap, gameSpeed )
       btmn.jumping = true;
       btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
     end --[[ btmn.health < 0 end ]]-- 
-    
   end --[[ not btmn.dead and btmn.canMove end ]]--
+  
+  if (btmn.punching) then
+    if (btmn.currentState ~= "punchingRight" and btmn.currentState ~= "punchingLeft") then
+      btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
+      
+      if (btmn.direction == RIGHT) then
+        btmn.currentState = "punchingRight";
+        btmn.currentAnim = btmn.punchRight;
+      elseif (btmn.direction == LEFT) then
+        btmn.currentState = "punchingLeft";
+        btmn.currentAnim = btmn.punchLeft;
+      end
+      
+      btmn.currentAnim[1]:resume();
+    elseif (btmn.currentState == "punchingRight" or btmn.currentState == "punchingLeft") then
+      if (btmn.currentAnim[1].status == "paused") then
+        btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
+      
+        if (btmn.direction == RIGHT) then
+          btmn.currentState = "standingRight";
+          btmn.currentAnim = btmn.standRight;
+        elseif (btmn.direction == LEFT) then
+          btmn.currentState = "standingLeft";
+          btmn.currentAnim = btmn.standLeft;
+        end
+        
+        btmn.punching = false;
+        btmn.canMove = true;
+        btmn.currentAnim[1]:resume();
+      end
+    end
+  end --[[ btmn.punching ]]--
+
+  if (btmn.throwingBatarang) then   
+    if (btmn.currentState ~= "throwingBatarangRight" and btmn.currentState ~= "throwingBatarangLeft") then
+      btmn.currentAnim[1]:pauseAtStart(); --Reset whatever animation is currently running
+      
+      if (btmn.direction == RIGHT) then
+        btmn.currentState = "throwingBatarangRight";
+        btmn.currentAnim = btmn.throwRight;
+      elseif (btmn.direction == LEFT) then
+        btmn.currentState = "throwingBatarangLeft";
+        btmn.currentAnim = btmn.throwLeft;
+      end
+      btmn.currentAnim[1]:resume();
+    end
+    
+    if (btmn.currentAnim[1].position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
+      if (btmn.currentState == "throwingBatarangRight") then
+         btmn.batarangs[btmn.activeBatarangs+1] = {
+           x = btmn.collisionRect.x + btmn.collisionRect.width - global.offsetX + (btmn.batarangImg:getWidth() / 2);
+           y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
+           width = btmn.batarangImg:getWidth(),
+           height = btmn.batarangImg:getHeight(),
+           active = true, 
+           angle = 0,
+           dir = "right"
+         };
+      elseif (btmn.currentState == "throwingBatarangLeft") then
+         btmn.batarangs[btmn.activeBatarangs+1] = {
+           x = btmn.collisionRect.x - global.offsetX - (btmn.batarangImg:getWidth() * 2), 
+           y = btmn.collisionRect.y - global.offsetY + (btmn.batarangImg:getHeight() * 1.6), 
+           width = btmn.batarangImg:getWidth(),
+           height = btmn.batarangImg:getHeight(),
+           active = true, 
+           angle = 0,
+           dir = "left"
+         };
+      end
+        
+      btmn.activeBatarangs = btmn.activeBatarangs + 1;
+    end --[[ btmn.currentAnim[1].position == 3 and btmn.activeBatarangs < btmn.maxNumberOfBatarangs end ]]--
+  
+    if (btmn.currentAnim[1].status == "paused") then
+      if (btmn.currentState == "throwingBatarangRight") then
+        btmn.throwRight[1]:pauseAtStart(); -- Reset throwing animation
+        btmn.currentState = "standingRight";
+        btmn.currentAnim = btmn.standRight;  
+        
+      elseif (btmn.currentState == "throwingBatarangLeft") then
+        btmn.throwLeft[1]:pauseAtStart(); -- Reset throwing animation
+        btmn.currentState = "standingLeft";
+        btmn.currentAnim = btmn.standLeft;
+      end  
+      
+      btmn.canMove = true;
+      btmn.throwingBatarang = false;
+    end --[[ btmn.currentAnim[1].status == "paused" end ]]--
+  
+  end --[[ btmn.throwingBatarang end ]]
 
   if (btmn.dead) then
     if (btmn.jumping) then
@@ -830,8 +865,7 @@ function btmn:draw()
     btmn.currentState == "duckingRight" or btmn.currentState == "duckingLeft" or 
     btmn.currentState == "standingUpRight" or btmn.currentState == "standingUpLeft" or
     btmn.currentState == "throwingBatarangRight" or btmn.currentState == "throwingBatarangLeft" or
-    btmn.currentState == "standingJumpRight" or btmn.currentState == "standingJumpLeft" or
-    btmn.currentState == "punchingRight" or btmn.currentState == "punchingLeft") then
+    btmn.currentState == "standingJumpRight" or btmn.currentState == "standingJumpLeft") then
     currentXOffset = 15;
   elseif (btmn.currentState == "walkingRight" or btmn.currentState == "toStandRight" or
     btmn.currentState == "deathJumpingRight" or btmn.currentState == "deathJumpingLeft" or
@@ -891,6 +925,12 @@ function btmn:keypressed( key, unicode )
   if (key == "q" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
     btmn.canMove = false;
     btmn.throwingBatarang = true;
+  end
+  
+  -- PUNCH (POW)!
+  if (key == "x" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang) then
+    btmn.canMove = false;
+    btmn.punching = true;
   end
 end
 
