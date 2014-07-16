@@ -569,18 +569,26 @@ function btmn:update( dt, colmap, gameSpeed )
       
       if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
         -- Quickening Animation, we skip the long pause on the first frame
-        if (btmn.currentAnim[1].position == 1) then 
-          btmn.standRight[1]:gotoFrame(2); 
-        end 
+        if (btmn.currentAnim[1].position <= 3) then 
+          if (btmn.direction == RIGHT) then
+            btmn.currentState = "blockingRight";
+            btmn.currentAnim = btmn.blockRight;
+          elseif (btmn.direction == LEFT) then
+            btmn.currentState = "blockingLeft";
+            btmn.currentAnim = btmn.blockLeft;
+          end
         
-        if (btmn.direction == RIGHT) then
-          btmn.standRight[1]:pauseAtStart(); -- Reset standing animation
-          btmn.currentState = "turningRight";
-          btmn.currentAnim = btmn.armsUpRight;
-        elseif (btmn.direction == LEFT) then
-          btmn.standLeft[1]:pauseAtStart(); -- Reset standing animation
-          btmn.currentState = "turningLeft";
-          btmn.currentAnim = btmn.armsUpLeft;
+        else
+        
+          if (btmn.direction == RIGHT) then
+            btmn.standRight[1]:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "turningRight";
+            btmn.currentAnim = btmn.armsUpRight;
+          elseif (btmn.direction == LEFT) then
+            btmn.standLeft[1]:pauseAtStart(); -- Reset standing animation
+            btmn.currentState = "turningLeft";
+            btmn.currentAnim = btmn.armsUpLeft;
+          end
         end
       end    
       
