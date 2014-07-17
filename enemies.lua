@@ -50,7 +50,7 @@ function enemy:update( dt, colmap, gameSpeed )
   -- TODO: Each enemy should have an individual range, but generic thugs 
   -- Will probably all have the same 
   local RANGE = 250;
-  local FIGHT_DISTANCE = 15;
+  local FIGHT_DISTANCE = 10;
   
   if (self.state == "idle") then
     -- Enemy is standing around

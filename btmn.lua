@@ -147,7 +147,7 @@ btmn.deathLandRight = {anim8.newAnimation(deathLandQuads, 0.15, 'pauseAtEnd'), i
 btmn.deathLandLeft = {btmn.deathLandRight[1]:clone():flipH(), img = btmn.deathLandImg};
 
 local punchGrid = anim8.newGrid(60, 64, btmn.punchImg:getWidth(), btmn.punchImg:getHeight());
-btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1, '2-1',1), {0.1, 0.1, 0.1, 0.1, 0.1, 0.08, 0.08}, 'pauseAtEnd'), img = btmn.punchImg};
+btmn.punchRight = {anim8.newAnimation(punchGrid('1-5',1, '2-1',1), 0.08, 'pauseAtEnd'), img = btmn.punchImg};
 btmn.punchLeft = {btmn.punchRight[1]:clone():flipH(), img = btmn.punchImg};
 
 btmn.currentAnim = btmn.standRight;
@@ -647,6 +647,8 @@ function btmn:update( dt, colmap, gameSpeed )
   end --[[ not btmn.dead and btmn.canMove end ]]--
   
   if (btmn.punching) then
+    btmn.collisionRect.width = 50;
+    
     if (btmn.currentState ~= "punchingRight" and btmn.currentState ~= "punchingLeft") then
       btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
       
