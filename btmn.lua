@@ -86,11 +86,11 @@ btmn.turnRight = {anim8.newAnimation(standGrid('5-1',1), {0.08, 0.08, 0.08, 0.08
 btmn.turnLeft = {btmn.turnRight[1]:clone():flipH(), img = btmn.standImg};
 
 local duckGrid = anim8.newGrid(60, 64, btmn.duckImg:getWidth(), btmn.duckImg:getHeight());
-btmn.duckRight = {anim8.newAnimation(duckGrid('1-7',1), 0.1, 'pauseAtEnd'), img = btmn.duckImg};
+btmn.duckRight = {anim8.newAnimation(duckGrid('1-7',1), 0.07, 'pauseAtEnd'), img = btmn.duckImg};
 btmn.duckLeft = {btmn.duckRight[1]:clone():flipH(), img = btmn.duckImg};
 
 local standUpGrid = anim8.newGrid(60, 64, btmn.standUpImg:getWidth(), btmn.standUpImg:getHeight());
-btmn.upRight = {anim8.newAnimation(standUpGrid('1-3',1), 0.1, 'pauseAtEnd'), img = btmn.standUpImg};
+btmn.upRight = {anim8.newAnimation(standUpGrid('1-3',1), 0.06, 'pauseAtEnd'), img = btmn.standUpImg};
 btmn.upLeft = {btmn.upRight[1]:clone():flipH(), img = btmn.standUpImg};
 
 local walkQuads = {};
@@ -107,7 +107,7 @@ btmn.walkRight = {anim8.newAnimation(walkQuads, 0.1, 'pauseAtEnd'), img = btmn.w
 btmn.walkLeft = {btmn.walkRight[1]:clone():flipH(), img = btmn.walkImg};
 
 local toStandGrid = anim8.newGrid(70, 64, btmn.toStandImg:getWidth(), btmn.toStandImg:getHeight());
-btmn.toStandRight = {anim8.newAnimation(toStandGrid('1-6',1), 0.08, 'pauseAtEnd'), img = btmn.toStandImg};
+btmn.toStandRight = {anim8.newAnimation(toStandGrid('1-6',1), 0.075, 'pauseAtEnd'), img = btmn.toStandImg};
 btmn.toStandLeft = {btmn.toStandRight[1]:clone():flipH(), img = btmn.toStandImg};
 
 local standingJumpGrid = anim8.newGrid(60, 66, btmn.standJumpImg:getWidth(), btmn.standJumpImg:getHeight());
@@ -543,30 +543,17 @@ function btmn:update( dt, colmap, gameSpeed )
       
       btmn.currentAnim[1]:resume();
     elseif (not love.keyboard.isDown("down") and btmn.ducking) then     
-      if (btmn.currentAnim[1].status == "paused") then
-        -- Fully ducked, stand up animation
-        if (btmn.direction == RIGHT) then
-          btmn.duckRight[1]:pauseAtStart();
-          btmn.currentState = "standingUpRight";       
-          btmn.currentAnim = btmn.upRight;
-        elseif (btmn.direction == LEFT) then
-          btmn.duckLeft[1]:pauseAtStart();
-          btmn.currentState = "standingUpLeft";       
-          btmn.currentAnim = btmn.upLeft;
-        end
-      else
-        -- We have not fully ducked, just revert back to standing       
-        if (btmn.direction == RIGHT) then
-          btmn.duckRight[1]:pauseAtStart();
-          btmn.currentState = "standingRight";
-          btmn.currentAnim = btmn.standRight;   
-        elseif (btmn.direction == LEFT) then
-          btmn.duckLeft[1]:pauseAtStart();
-          btmn.currentState = "standingLeft";
-          btmn.currentAnim = btmn.standLeft;
-        end
+      -- Fully ducked, stand up animation
+      if (btmn.direction == RIGHT) then
+        btmn.duckRight[1]:pauseAtStart();
+        btmn.currentState = "standingUpRight";       
+        btmn.currentAnim = btmn.upRight;
+      elseif (btmn.direction == LEFT) then
+        btmn.duckLeft[1]:pauseAtStart();
+        btmn.currentState = "standingUpLeft";       
+        btmn.currentAnim = btmn.upLeft;
       end
-      
+
       btmn.currentAnim[1]:resume();
       btmn.ducking = false;      
     end

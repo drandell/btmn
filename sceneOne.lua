@@ -23,6 +23,7 @@ end
 function sceneOne:load()
   -- Load Map
   map = loader.load("test.tmx");
+  map.useSpriteBatch = true;
   
   -- Load Enemies
   loadEnemies(map);
