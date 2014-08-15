@@ -102,7 +102,7 @@ end
 -- KeyPressed
 function sceneOne:keypressed( key, unicode )
   if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
-  if (key == "f2") then btmn.health = btmn.health - 20; end
+  if (key == "f2") then btmn.health = btmn.health - 20; btmn.takenDmg = true; end
   
   btmn:keypressed(key, unicode);
 end

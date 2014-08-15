@@ -38,6 +38,11 @@ btmn.ducking = false;
 btmn.blocking = false;
 btmn.throwingBatarang = false;
 btmn.punching = false;
+btmn.takenDmg = false;
+
+-- Locals
+local canDraw = true;
+local dmgTimer = 0;
 
 -- Rope bools
 --btmn.collidingWithRope = false;
@@ -625,16 +630,38 @@ function btmn:update( dt, colmap, gameSpeed )
       btmn.blocking = false;
     end
     
+    if (btmn.takenDmg) then
+      dmgTimer = dmgTimer + dt;
+    
+      if (dmgTimer >= 0.1 and dmgTimer <= 0.15 or 
+        dmgTimer >= 0.25 and dmgTimer <= 0.3 or
+        dmgTimer >= 0.4 and dmgTimer < 0.45) then
+        canDraw = true;
+      elseif (dmgTimer > 0.5) then
+        btmn.takenDmg = false;
+        dmgTimer = 0;
+        canDraw = true;
+      else
+        canDraw = false;
+      end
+    end
+    
     if (btmn.health <= 0) then
       btmn.dead = true;
       btmn.speedY = 8;
       btmn.jumping = true;
       btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
-    end --[[ btmn.health < 0 end ]]-- 
-  end --[[ not btmn.dead and btmn.canMove end ]]--
+      canDraw = true;
+    end --[[ btmn.health < 0 ]]-- 
+  end --[[ not btmn.dead and btmn.canMove ]]--
   
   if (btmn.punching) then
     btmn.collisionRect.width = 50;
+    
+    --Update collision box offset if facing left, right is fine as is
+    if (btmn.direction == LEFT) then
+      collisionOffset.x = -20;
+    end
     
     if (btmn.currentState ~= "punchingRight" and btmn.currentState ~= "punchingLeft") then
       btmn.currentAnim[1]:pauseAtStart(); -- Reset current animation
@@ -663,8 +690,8 @@ function btmn:update( dt, colmap, gameSpeed )
         btmn.punching = false;
         btmn.canMove = true;
         btmn.currentAnim[1]:resume();
-      end
-    end
+      end -- [[ btmn.currentAnim[1].status == "paused" ]]--
+    end --[[ if/elseif btmn.currentState ~/= "punchingRight" and btmn.currentState ~/= "punchingLeft"  ]]--
   end --[[ btmn.punching ]]--
 
   if (btmn.throwingBatarang) then   
@@ -721,9 +748,9 @@ function btmn:update( dt, colmap, gameSpeed )
       
       btmn.canMove = true;
       btmn.throwingBatarang = false;
-    end --[[ btmn.currentAnim[1].status == "paused" end ]]--
+    end --[[ btmn.currentAnim[1].status == "paused" ]]--
   
-  end --[[ btmn.throwingBatarang end ]]
+  end --[[ btmn.throwingBatarang ]]
 
   if (btmn.dead) then
     if (btmn.jumping) then
@@ -870,15 +897,20 @@ function btmn:draw()
     if (btmn.currentAnim[1].position <=  3 or btmn.currentAnim[1].position >= 6) then
       currentXOffset = 15;
     else
-      currentXOffset = 5;
+      if (btmn.direction == RIGHT) then
+        currentXOffset = 5;
+      elseif (btmn.direction == LEFT) then
+        currentXOffset = 25;
+      end
     end
   end
   
   -- Draw btmn 
-  btmn.currentAnim[1]:draw(btmn.currentAnim.img, 
+  if (canDraw) then
+    btmn.currentAnim[1]:draw(btmn.currentAnim.img, 
         btmn.x + global.tx + global.offsetX - currentXOffset, 
         btmn.y + global.ty + global.offsetY + currentYOffset);
-  
+  end
   
   -- Draw Batarangs
   for i, batarang in pairs( btmn.batarangs ) do
