@@ -23,6 +23,7 @@ enemy = class( function( enemy,x,y,width,height,speedX, typeOf, state, nxtState,
               enemy.direction = -1;
               enemy.health = 100;
               enemy.alive = true;
+              enemy.hit = false;
               enemy.typeOf = typeOf;
               enemy.img = nil;
               enemy.animations = {};
@@ -58,6 +59,7 @@ function enemy:update( dt, colmap, gameSpeed )
         self.x < btmn.x and btmn.x - RANGE < self.x) then
       if (self.nxtState ~= nil) then
         self.state = self.nxtState;
+        self.nxtState = "actioned";
       else
         self.state = "actioned";
       end

@@ -160,7 +160,8 @@ btmn.currentAnim = btmn.standRight;
 --[[ Local Function ]]--
 -- Bounding box collision
 function boxCollision( x, y, width, height )
-  if (btmn.collisionRect.x + btmn.width > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
+  if (btmn.collisionRect.x + btmn.width > x) and (btmn.collisionRect.x + global.tx < x + width) 
+  and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
     return true;
   else
     return false;
@@ -170,7 +171,8 @@ end
 -- Half width bounding box collision detection
 function boxCollisionHalfWidth( x, y, width, height )
   if (btmn.direction == RIGHT) then
-      if (btmn.collisionRect.x + (btmn.width / 2) > x) and (btmn.collisionRect.x < x + width) and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
+      if (btmn.collisionRect.x + (btmn.width / 2) > x) and (btmn.collisionRect.x + global.tx < x + width) 
+      and (btmn.collisionRect.y + btmn.height + global.ty > y) and (btmn.collisionRect.y < y + height) then
         return true;
       else
         return false;
@@ -844,10 +846,10 @@ function btmn:updateBatarangs( enemy , gameSpeed )
       end
       
       -- Check Collision Against Enemies
-      if (batarang.x - BATARANG_SPD + batarang.width + global.tx > enemy.x) 
-        and (batarang.x  - BATARANG_SPD < enemy.x + enemy.width) 
-        and (batarang.y + batarang.height + global.ty > enemy.y) 
-        and (batarang.y < enemy.y + enemy.height and enemy.state ~= "knockout") then
+      if (batarang.x - BATARANG_SPD + batarang.width > enemy.x) 
+        and (batarang.x  - BATARANG_SPD + global.tx < enemy.x + enemy.width) 
+        and (batarang.y + batarang.height > enemy.y) 
+        and (batarang.y + global.ty < enemy.y + enemy.height and enemy.state ~= "knockout") then
           enemy.health = enemy.health - BATARANG_DMG;
           batarang.active = false;
           btmn.activeBatarangs = btmn.activeBatarangs - 1;
@@ -868,6 +870,26 @@ function btmn:updateBatarangs( enemy , gameSpeed )
       end
     end
   end
+end
+--[[ Function ]]--
+-- Check Collision
+function btmn:checkCollisionWth( enemy )
+  local PUNCH_DMG = 25;
+  
+  -- If punching
+  if (btmn.punching) then
+    if (boxCollision(enemy.x + global.tx, enemy.y + global.ty, enemy.width, enemy.height) 
+      and enemy.state ~= "knockout" and not enemy.hit) then
+          enemy.health = enemy.health - PUNCH_DMG;
+          global.targetedEnemy = enemy;
+          enemy.hit = true;
+      end
+  elseif (not btmn.punching) then
+    if (enemy.hit) then
+      enemy.hit = not enemy.hit;
+    end
+  end --[[ btmn.punching / not btmn.punching ]]--
+  
 end
 --[[ Function ]]--
 -- Draw

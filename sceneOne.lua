@@ -56,6 +56,7 @@ function sceneOne:update( dt )
   for i, enemy in pairs( enemies ) do
       enemy:update(dt, map, global.currentGameSpeed);
       btmn:updateBatarangs(enemy, global.currentGameSpeed);
+      btmn:checkCollisionWth(enemy);
       enemy:updateStatus(i);
     end
 end
