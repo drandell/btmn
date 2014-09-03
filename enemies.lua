@@ -24,6 +24,9 @@ enemy = class( function( enemy,x,y,width,height,speedX, typeOf, state, nxtState,
               enemy.health = 100;
               enemy.alive = true;
               enemy.hit = false;
+              enemy.canDraw = true;
+              enemy.takenDmg = false;
+              enemy.dmgTimer = 0;
               enemy.typeOf = typeOf;
               enemy.img = nil;
               enemy.animations = {};
@@ -104,6 +107,21 @@ function enemy:update( dt, colmap, gameSpeed )
     -- Enemy has been defeated
   end
   
+  if (self.takenDmg) then
+      self.dmgTimer = self.dmgTimer + dt;
+    
+      if (self.dmgTimer >= 0.1 and self.dmgTimer <= 0.15 or 
+        self.dmgTimer >= 0.25 and self.dmgTimer <= 0.3) then
+        self.canDraw = true;
+      elseif (self.dmgTimer > 0.3) then
+        self.takenDmg = false;
+        self.dmgTimer = 0;
+        self.canDraw = true;
+      else
+        self.canDraw = false;
+      end
+  end
+  
   -- Update Collision Rectangle
   self.collisionRect.x = (self.x + self.offset.x) + global.offsetX + global.tx;
   self.collisionRect.y = (self.y - self.offset.y) + global.offsetY + global.ty;
@@ -120,7 +138,7 @@ end
 -- Enemy draw
 function enemy:draw()
   if (self.state ~= "speak") then 
-    if (self.x + self.width + global.tx > 0) then 
+    if (self.x + self.width + global.tx > 0 and self.canDraw) then 
       love.graphics.draw(self.img, 
         self.x + global.tx + global.offsetX, 
         self.y + global.offsetY + global.ty, 

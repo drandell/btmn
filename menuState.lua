@@ -92,8 +92,6 @@ function menuState:draw()
         );
     end
   end
-
-  --love.graphics.print("Current Selected Itm: ".. menuState.currentSelectedOption, 0, 0);
 end
 
 -- KeyPressed

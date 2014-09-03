@@ -8,7 +8,7 @@
 require("./Libraries/stateManager");
 require("./Libraries/lovelyMoon");
 require("./Libraries/colors");
-require("./storyFader");
+--require("./storyFader");
 require("./mapObjects");
 
 -- Advanced Tiled Loader Library

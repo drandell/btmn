@@ -851,6 +851,7 @@ function btmn:updateBatarangs( enemy , gameSpeed )
         and (batarang.y + batarang.height > enemy.y) 
         and (batarang.y + global.ty < enemy.y + enemy.height and enemy.state ~= "knockout") then
           enemy.health = enemy.health - BATARANG_DMG;
+          enemy.takenDmg = true;
           batarang.active = false;
           btmn.activeBatarangs = btmn.activeBatarangs - 1;
           global.targetedEnemy = enemy;
@@ -883,10 +884,11 @@ function btmn:checkCollisionWth( enemy )
           enemy.health = enemy.health - PUNCH_DMG;
           global.targetedEnemy = enemy;
           enemy.hit = true;
+          enemy.takenDmg = true;
       end
   elseif (not btmn.punching) then
     if (enemy.hit) then
-      enemy.hit = not enemy.hit;
+      enemy.hit = not enemy.hit; -- We've already hit the enemy, can't hit him twice.
     end
   end --[[ btmn.punching / not btmn.punching ]]--
   
