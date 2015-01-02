@@ -5,6 +5,7 @@
  -- Dan
 ]]--
 require("./Libraries/class");
+math.randomseed(os.time());
 
 local LEFT = -1;
 local RIGHT = 1;
@@ -36,6 +37,7 @@ enemy = class( function( enemy,x,y,width,height,speedX, typeOf, state, nxtState,
               enemy.message = msg;
               enemy.dly = 500;
               enemy.oldDly = 500;
+              enemy.punchDly = math.random(500, 1050);
               enemy.alpha = 255;
               enemy.offset = {x = offsetX, y = offsetY};
               enemy.collisionRect = {
@@ -55,6 +57,7 @@ function enemy:update( dt, colmap, gameSpeed )
   -- Will probably all have the same 
   local RANGE = 250;
   local FIGHT_DISTANCE = 10;
+  local PUNCH_DMG = 10;
   
   if (self.state == "idle") then
     -- Enemy is standing around
@@ -95,12 +98,52 @@ function enemy:update( dt, colmap, gameSpeed )
       self.x = self.x - self.speedX;
     elseif (self.x < btmn.x and btmn.x - FIGHT_DISTANCE > self.x + self.width) then
       self.x = self.x + self.speedX;
+    else
+      self.state = "punch"; 
+      -- future; how do we decide what action to take in terms of attacking the player? 
     end
       
   elseif (self.state == "punch") then
-    -- Fighting Batman
+    -- Fighting BTMN
+    local delta = (love.timer.getAverageDelta() * 1000);
+    self.punchDly = self.punchDly - delta;
+    
+    if (self.punchDly < 0 and self.x > btmn.x and btmn.x + btmn.width + FIGHT_DISTANCE <= self.x + (self.width / 2)) then
+      btmn.health = btmn.health - PUNCH_DMG;
+      
+      if (not btmn.takenDmg) then
+        self.punchDly = math.random(550, 1050);
+        btmn.takenDmg = true;
+      end
+    elseif (self.punchDly < 0 and self.x < btmn.x and btmn.x + btmn.width - FIGHT_DISTANCE >= self.x + (self.width / 2)) then
+      btmn.health = btmn.health - PUNCH_DMG;
+      
+      if (not btmn.takenDmg) then
+        self.punchDly = math.random(550, 1050);
+        btmn.takenDmg = true;
+      end
+    elseif (btmn.x + btmn.width + FIGHT_DISTANCE < self.x and btmn.direction ~= RIGHT) then
+     -- BTMN has moved out of range, so re-chase him down!
+      self.dly = self.dly - delta;
+      
+      if (self.dly < 0) then
+        self.state = "actioned"
+        self.punchDly = math.random(500, 1050);
+        self.dly = self.oldDly;
+      end
+    elseif (self.x + self.width + FIGHT_DISTANCE < btmn.x and btmn.direction ~= LEFT) then
+     -- BTMN has moved out of range, so re-chase him down!
+      self.dly = self.dly - delta;
+      
+      if (self.dly < 0) then
+        self.state = "actioned"
+        self.punchDly = math.random(500, 1050);
+        self.dly = self.oldDly;
+      end
+    end
+    
   elseif (self.state == "kick") then
-    -- Fighting Batman
+    -- Fighting BTMN
   elseif (self.state == "stunned") then
     --Enemy has been stunned
   elseif (self.state == "knockout") then
