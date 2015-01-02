@@ -755,6 +755,7 @@ function btmn:update( dt, colmap, gameSpeed )
   end --[[ btmn.throwingBatarang ]]
 
   if (btmn.dead) then
+    
     if (btmn.jumping) then
       local LEFT_BOUNDARY = 16;
       jump(colmap("Collision Layer"), gameSpeed);  
@@ -967,21 +968,23 @@ function btmn:keypressed( key, unicode )
     if (key == "return") then btmn.convoInput = true; end
   end
   
-  if (key == " ") and not btmn.jumping then
-    btmn.jumping = true;
-    btmn.speedY = 8;
-  end
-  
-  -- Throw Batarang(s)!
-  if (key == "q" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
-    btmn.canMove = false;
-    btmn.throwingBatarang = true;
-  end
-  
-  -- PUNCH (POW)!
-  if (key == "x" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang) then
-    btmn.canMove = false;
-    btmn.punching = true;
+  if not btmn.dead then
+    if (key == " ") and not btmn.jumping then
+      btmn.jumping = true;
+      btmn.speedY = 8;
+    end
+    
+    -- Throw Batarang(s)!
+    if (key == "q" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang and btmn.activeBatarangs < btmn.maxNumberOfBatarangs) then
+      btmn.canMove = false;
+      btmn.throwingBatarang = true;
+    end
+    
+    -- PUNCH (POW)!
+    if (key == "x" and not btmn.jumping and not btmn.blocking and not btmn.ducking and not btmn.throwingBatarang) then
+      btmn.canMove = false;
+      btmn.punching = true;
+    end
   end
 end
 
