@@ -21,12 +21,34 @@ end
 
 -- Load
 function sceneOne:load()
-  -- Load Map
-  map = loader.load("test.tmx");
-  map.useSpriteBatch = true;
+  -- Set world meter size (in pixels)
+love.physics.setMeter(64);
+	
+-- Prepare physics world with horizontal and vertical gravity
+world = love.physics.newWorld(0, 0);
+
+-- Load a map exported to Lua from Tiled
+map = sti(sti.path .. "test.lua", { "bump" });
+	
+	-- Prepare collision objects
+	map:bump_init(world);  
   
   -- Load Enemies
-  loadEnemies(map);
+local redHoodImg = love.graphics.newImage("Content/Images/testEnemy.png");
+local props = {}; 
+  
+  -- Are there enemies on this map?
+  for k, object in pairs(map.objects) do
+        if object.name == "Enemy" then
+            props = map:getObjectProperties ("Enemies", "Enemy");
+			
+			enemies[k] = enemy(object.x, object.y, object.width, object.height, props.speedX, object.type, props.state, props.nextState, props.message, props.offsetX, props.offsetY);
+        
+			if (string.lower(enemies[k].typeOf) == "redhoodgang") then
+				enemies[k].img = redHoodImg;
+			end
+        end
+    end  
   
   --Load Images
   overlay = love.graphics.newImage("Content/Images/overlay.png");
@@ -66,19 +88,9 @@ function sceneOne:draw()
     love.graphics.clear();
     
     -- Scale and translate the game screen for map drawing
-    local ftx, fty = math.floor(global.tx), math.floor(global.ty)
-    love.graphics.push()
-    love.graphics.scale(global.scale)
-    love.graphics.translate(global.offsetX + ftx, global.offsetY + fty)
-    
-    -- Set the draw range 
-    map:autoDrawRange(global.offsetX + ftx, global.offsetY + fty, global.scale, 50);  
-    map:setDrawRange( 0, 0 , global.gameWorldWidth + global.tSize - ftx, global.gameWorldHeight - fty);
+   local ftx, fty = math.floor(global.tx), math.floor(global.ty)
     -- Draw the map
-    map:draw() 
-    
-    -- Reset the scale and translation
-    love.graphics.pop()   
+    map:draw(global.offsetX + ftx, global.offsetY + fty, global.scale, global.scale) 
     
     -- Draw Enemies
     for i, enemy in pairs( enemies ) do
@@ -102,7 +114,7 @@ end
 
 -- KeyPressed
 function sceneOne:keypressed( key, unicode )
-  if (key == "f1") then map("Collision Layer").visible = not map("Collision Layer").visible; end
+  if (key == "f1") then map.layers["Collision Layer"].visible = not map.layers["Collision Layer"].visible; end
   if (key == "f2") then btmn.health = btmn.health - 20; btmn.takenDmg = true; end
   
   btmn:keypressed(key, unicode);

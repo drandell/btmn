@@ -62,3 +62,43 @@ function lovelyMoon.mousereleased(x, y, button)
       end
    end
 end
+
+function lovelyMoon.mousemoved(x, y, dx, dy, istouch) 
+   for index, state in pairs(stateManager.states) do
+      if state and state._enabled and state.mousemoved then
+         state:mousemoved(x, y, dx, dy, istouch) 
+      end
+   end
+end
+
+function lovelyMoon.wheelmoved(x, y)
+   for index, state in pairs(stateManager.states) do
+      if state and state._enabled and state.wheelmoved then
+         state:wheelmoved(x,y)
+      end
+   end
+end
+
+function lovelyMoon.touchpressed(id, x, y, dx, dy, pressure)
+	for index, state in pairs(stateManager.states) do
+      if state and state._enabled and state.touchpressed then
+         state:touchpressed(id,x,y,dx,dy,pressure)
+      end
+   end
+end
+
+function lovelyMoon.touchreleased(id, x, y, dx, dy, pressure)
+	for index, state in pairs(stateManager.states) do
+      if state and state._enabled and state.touchpressed then
+         state:touchreleased(id,x,y,dx,dy,pressure)
+      end
+   end
+end
+
+function lovelyMoon.textinput(t)
+	for index, state in pairs(stateManager.states) do
+      if state and state._enabled and state.textinput then
+         state:textinput(t)
+      end
+   end
+end

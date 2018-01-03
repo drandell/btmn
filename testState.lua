@@ -1,5 +1,4 @@
 testState = {}
-storyBoardOne = storyFader;
 
 --New
 function testState:new()
@@ -14,9 +13,6 @@ end
 
 --Load
 function testState:load()
-  storyBoardOne:addImageEntry(love.graphics.newImage("/Content/Images/zelda.png"), 
-    love.graphics.newQuad(0, 0, 100, 100, 502, 445), 2, 200, 200 );
-  storyBoardOne:addTextEntry("A long, long time ago", 8, 180, 320, {255, 255, 255} );
 end
 
 --Close

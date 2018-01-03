@@ -38,7 +38,9 @@ function debugState:draw()
   love.graphics.setFont(gameFont);
   love.graphics.setColor(red);
   
-  love.graphics.printf("Using version: " .. version, 0, 0, global.viewportWidth - 6, "right");
+  local major, minor, revision, codename = love.getVersion()
+  local vers = string.format("Version %d.%d.%d - %s", major, minor, revision, codename)  
+  love.graphics.printf("Using version: " .. vers, 0, 0, global.viewportWidth - 6, "right");
   love.graphics.printf("FPS: " .. tostring(love.timer.getFPS()), 0, 0, global.viewportWidth, "left");
   love.graphics.printf("Current State: ".. getActiveStates()[1], 0, 10, global.viewportWidth, "left");
   

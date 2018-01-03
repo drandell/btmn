@@ -15,6 +15,9 @@ require("./mapObjects");
 loader = require("./Libraries/AdvTiledLoader/Loader");
 loader.path = "Content/Maps/";
 
+sti = require ("./Libraries/STI");
+sti.path = "Content/Maps/";
+
 -- Anim 8 by Enrique García Cota
 anim8 = require("./Libraries/anim8");
 

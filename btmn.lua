@@ -56,7 +56,7 @@ btmn.convoActive = false;
 btmn.convoInput = false;
 btmn.selectedConvoOption = 0;
 
-offset = {x = 0, y = 0};
+offset = {x = -40, y = -40};
 btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width, height = btmn.height };
 
 -- Collision tile variables
@@ -203,13 +203,12 @@ end
 -- Jump function, makes btmn jump
 function jump( colMap, gSpeed, grav )
 grav = grav or 0.45;
-collisionMap = colMap;
 btmn.speedY = (btmn.speedY - grav * gSpeed);
 
 	if (btmn.speedY < 0) then
-		moveBtmn(0, 1, collisionMap, gSpeed);
+		moveBtmn(0, 1, colMap, gSpeed);
 	elseif (btmn.speedY > 0) then
-		moveBtmn(0, -1, collisionMap, gSpeed);
+		moveBtmn(0, -1, colMap, gSpeed);
 	end
 end
 --[[ Local Function ]]--
@@ -219,8 +218,7 @@ fallSpeed = -0.5 or fallSpeed;
 
   if not btmn.jumping and not btmn.onRope then
     getBtmnCorners(btmn.x, btmn.y + 1);
-      if (collisionMap:get(left, down) == nil and collisionMap:get(right, down) == nil) 
-         and collisionMap:get(middleX, down) == nil then
+      if collisionMap.data[down][left] == nil and collisionMap.data[down][right] == nil and collisionMap.data[down][middleX] == nil then
         btmn.speedY = fallSpeed;
         btmn.jumping = true;
       end
@@ -229,6 +227,8 @@ end
 --[[ Local Function ]]--
 -- Move btmn
 function moveBtmn( dirx, diry, collisionMap, gSpeed )
+	local window_width = love.graphics.getWidth() ;
+	
   --Update postition
   if not btmn.dead and btmn.x >= 0 and btmn.y >= 0 and btmn.y < global.gameWorldHeight then
     btmn.x = (btmn.x + (btmn.speedX * dirx) * gSpeed);
@@ -239,17 +239,16 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
     end
     
     if (btmn.x < 12) then btmn.x = 12; end
-    if (btmn.x + btmn.width + btmn.speedX > (map.width * map.tileWidth)) then 
-      btmn.x = (map.width * map.tileWidth) - btmn.width - btmn.speedX;
+    if (btmn.x + btmn.width + btmn.speedX > (map.width * map.tilewidth)) then 
+      btmn.x = (map.width * map.tilewidth) - btmn.width - btmn.speedX;
     end
   
     -- Get btmn Tile Corners
     getBtmnCorners(btmn.x, btmn.y);
   
     if (dirx == 1) then
-        if (collisionMap:get(right, down) == nil 
-            and collisionMap:get(right, up) == nil) then
-            if (btmn.x + btmn.width) > ((love.graphics.getWidth() / 2)) and global.tx > -global.gameWorldWidth then
+        if ( collisionMap.data[down][right] == nil and collisionMap.data[up][right] == nil and collisionMap.data[middleY][right] == nil) then
+            if (btmn.x + btmn.width) > (window_width / 2) and global.tx > -global.gameWorldWidth then
                 global.tx = (global.tx - btmn.speedX * gSpeed);
             end
         else
@@ -258,9 +257,8 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
     end
     
     if (dirx == -1) then
-        if (collisionMap:get(left, down) == nil and collisionMap:get(left, middleY) == nil 
-            and collisionMap:get(left, up) == nil) then	
-            if (btmn.x + global.tx) < ((love.graphics.getWidth() / 2)) and global.tx < 0 then
+        if (collisionMap.data[down][left] == nil and collisionMap.data[up][left] == nil and collisionMap.data[middleY][left] == nil) then	
+            if (btmn.x + global.tx) < (window_width / 2) and global.tx < 0 then
                 global.tx = (global.tx + btmn.speedX * gSpeed);
                 
                 if (global.tx > 0) then global.tx = 0; end
@@ -271,8 +269,7 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
     end
     
     if (diry == 1) then
-        if (collisionMap:get(left, down) == nil and collisionMap:get(right, down) == nil
-          and collisionMap:get(middleX, down) == nil) then
+        if (collisionMap.data[down][left] == nil and collisionMap.data[down][right] == nil and collisionMap.data[down][middleX] == nil) then
         else
           btmn.y = (down * global.tSize) - (btmn.height - offset.y);
           btmn.jumping = false;
@@ -281,7 +278,7 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
     end
     
     if (diry == -1) then
-      if (collisionMap:get(left, up) == nil and collisionMap:get(right, up) == nil) then	   
+      if (collisionMap.data[up][left] == nil and collisionMap.data[up][right] == nil) then	   
       else
         global.currentGameSpeed = 1; -- Reset Game Speed If We have a collision
         btmn.y = (up * global.tSize);
@@ -300,8 +297,7 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
       getBtmnCorners(btmn.x, btmn.y);
       
       if (diry == 1) then
-        if (collisionMap:get(left, down) == nil and collisionMap:get(right, down) == nil
-          and collisionMap:get(middleX, down) == nil) then
+        if (collisionMap.data[down][left] == nil and collisionMap.data[down][right] == nil and collisionMap.data[down][middleX] == nil) then
         else
           btmn.y = (down * global.tSize) - (btmn.height - offset.y);
           btmn.jumping = false;
@@ -326,15 +322,13 @@ function btmn:update( dt, colmap, gameSpeed )
   btmn.currentAnim[1]:update(dt);
   
   -- Check to see if the object should be falling
-	fall(colmap("Collision Layer"));
+	fall(colmap.layers["Collision Layer"]);
   -- Check if the btmn is colliding with a rope obj
   --checkCollisionWithRope(colmap);
   
   -- btmn Movement Update
   if not btmn.dead and btmn.canMove then
     if not btmn.ducking and not btmn.blocking then
-      offset.x = 0; -- No offset required!
-      
       --[[ Look Up Animation ]]--
       if (love.keyboard.isDown("up")) then      
         if (btmn.currentState == "standingRight" or btmn.currentState == "standingLeft") then
@@ -408,7 +402,7 @@ function btmn:update( dt, colmap, gameSpeed )
           end
           
           if (btmn.currentState == "walkingRight") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+            moveBtmn(btmn.direction, 0, colmap.layers["Collision Layer"], gameSpeed); 
           end
           btmn.currentAnim[1]:resume();
       end
@@ -438,7 +432,7 @@ function btmn:update( dt, colmap, gameSpeed )
           end
           
           if (btmn.currentState == "walkingLeft") then
-            moveBtmn(btmn.direction, 0, colmap("Collision Layer"), gameSpeed); 
+            moveBtmn(btmn.direction, 0, colmap.layers["Collision Layer"], gameSpeed); 
           end
           btmn.currentAnim[1]:resume();
       end
@@ -503,7 +497,7 @@ function btmn:update( dt, colmap, gameSpeed )
       end --[[ not love.keyboard.isDown("left") and not love.keyboard.isDown("right") end ]]--
    
       if (btmn.jumping) then
-          jump(colmap("Collision Layer"), gameSpeed);     
+          jump(colmap.layers["Collision Layer"], gameSpeed);     
           
           if (btmn.currentState == "standingRight") then
             btmn.standRight[1]:pauseAtStart(); -- Reset standing animation
@@ -758,7 +752,7 @@ function btmn:update( dt, colmap, gameSpeed )
     
     if (btmn.jumping) then
       local LEFT_BOUNDARY = 16;
-      jump(colmap("Collision Layer"), gameSpeed);  
+      jump(colmap.layers["Collision Layer"], gameSpeed);  
       btmn.x = btmn.x - (btmn.speedX / 2) * btmn.direction; 
       
       if (btmn.x < LEFT_BOUNDARY) then btmn.x = LEFT_BOUNDARY; end --[[ btmn.x < LEFT_BOUNDARY end; stop player leaving game screen when dying]]--
@@ -783,7 +777,8 @@ function btmn:update( dt, colmap, gameSpeed )
     end
   end --[[ btmn.dead end ]]--
   
-  -- btmn Collision Update
+  --  btmn Collision Update
+--[[  
   if (colmap("Messages Layer")) then
       for i, obj in pairs( colmap("Messages Layer").objects ) do
           if (boxCollision(obj.drawInfo.left + global.tx, obj.drawInfo.top + global.ty, obj.width, obj.height)) then
@@ -812,10 +807,11 @@ function btmn:update( dt, colmap, gameSpeed )
           end
       end
   end
+  ]]--
   
   -- Update Collision Rectangle
-  btmn.collisionRect.x = (btmn.x + offset.x) + global.offsetX + global.tx + collisionOffset.x;
-  btmn.collisionRect.y = (btmn.y - offset.y) + global.offsetY + global.ty + collisionOffset.y;
+  btmn.collisionRect.x = (btmn.x - offset.x) + global.tx + collisionOffset.x;
+  btmn.collisionRect.y = (btmn.y - offset.y) + global.ty + collisionOffset.y;
 end
 --[[ Function ]]--
 -- Update batarangs

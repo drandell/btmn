@@ -57,7 +57,7 @@ function enemy:update( dt, colmap, gameSpeed )
   -- Will probably all have the same 
   local RANGE = 250;
   local FIGHT_DISTANCE = 10;
-  local PUNCH_DMG = 10;
+  local PUNCH_DMG = 5;
   
   if (self.state == "idle") then
     -- Enemy is standing around
