@@ -55,11 +55,4 @@ function debugState:draw()
   
   
   love.graphics.setNewFont(12);
-  
-    -- Draw Player Debug
-  if (btmn.drawDebug) then 
-    love.graphics.setColor(yellow);
-    love.graphics.rectangle("line", btmn.collisionRect.x, btmn.collisionRect.y, btmn.collisionRect.width, btmn.collisionRect.height);  
-    love.graphics.reset();
-  end
 end

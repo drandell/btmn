@@ -56,7 +56,8 @@ btmn.convoActive = false;
 btmn.convoInput = false;
 btmn.selectedConvoOption = 0;
 
-offset = {x = -40, y = -40};
+renderOffset = {x = 0, y = -25};
+offset = {x = 0, y = 0};
 btmn.collisionRect = {x = (btmn.x + offset.x) - global.tx, y = (btmn.y - offset.y) - global.ty, width = btmn.width, height = btmn.height };
 
 -- Collision tile variables
@@ -230,13 +231,14 @@ function moveBtmn( dirx, diry, collisionMap, gSpeed )
 	local window_width = love.graphics.getWidth() ;
 	
   --Update postition
-  if not btmn.dead and btmn.x >= 0 and btmn.y >= 0 and btmn.y < global.gameWorldHeight then
-    btmn.x = (btmn.x + (btmn.speedX * dirx) * gSpeed);
-    if btmn.speedY > 0 then
-      btmn.y = (btmn.y + (btmn.speedY * diry) * gSpeed); 
-    elseif btmn.speedY < 0 then
-      btmn.y = (btmn.y - (btmn.speedY * diry) * gSpeed); 
-    end
+	if not btmn.dead and btmn.x >= 0 and btmn.y >= 0 and btmn.y < global.gameWorldHeight then
+		btmn.x = (btmn.x + (btmn.speedX * dirx) * gSpeed);
+		
+		if btmn.speedY > 0 then
+			btmn.y = (btmn.y + (btmn.speedY * diry) * gSpeed); 
+		elseif btmn.speedY < 0 then
+			btmn.y = (btmn.y - (btmn.speedY * diry) * gSpeed); 
+		end
     
     if (btmn.x < 12) then btmn.x = 12; end
     if (btmn.x + btmn.width + btmn.speedX > (map.width * map.tilewidth)) then 
@@ -810,8 +812,8 @@ function btmn:update( dt, colmap, gameSpeed )
   ]]--
   
   -- Update Collision Rectangle
-  btmn.collisionRect.x = (btmn.x - offset.x) + global.tx + collisionOffset.x;
-  btmn.collisionRect.y = (btmn.y - offset.y) + global.ty + collisionOffset.y;
+  btmn.collisionRect.x = (btmn.x + global.offsetX) + global.tx + collisionOffset.x + renderOffset.x;
+  btmn.collisionRect.y = (btmn.y + global.offsetY) + global.ty + collisionOffset.y + renderOffset.y;
 end
 --[[ Function ]]--
 -- Update batarangs
@@ -926,23 +928,33 @@ function btmn:draw()
     end
   end
   
-  -- Draw btmn 
-  if (canDraw) then
-    btmn.currentAnim[1]:draw(btmn.currentAnim.img, 
-        btmn.x + global.tx + global.offsetX - currentXOffset, 
-        btmn.y + global.ty + global.offsetY + currentYOffset);
-  end
+	-- Draw btmn 
+	local renderX = btmn.x + global.tx + global.offsetX - currentXOffset + renderOffset.x;
+	local renderY = btmn.y + global.ty + global.offsetY + currentYOffset + renderOffset.y;
+	
+	if (canDraw) then
+		btmn.currentAnim[1]:draw(btmn.currentAnim.img, 
+			renderX, 
+			renderY);
+	end
   
-  -- Draw Batarangs
-  for i, batarang in pairs( btmn.batarangs ) do
-    if (batarang.active) then
-      local rotatePoint = 2;
-        love.graphics.draw(btmn.batarangImg, 
-          batarang.x + rotatePoint + global.tx + global.offsetX, 
-          batarang.y + rotatePoint + global.ty + global.offsetY,
-          math.rad(batarang.angle));
-    end
-  end
+	-- Draw Player Debug
+	if (btmn.drawDebug) then 
+		love.graphics.setColor(yellow);
+		love.graphics.rectangle("line", btmn.collisionRect.x, btmn.collisionRect.y, btmn.collisionRect.width, btmn.collisionRect.height);  
+		love.graphics.reset();
+	end
+  
+	-- Draw Batarangs
+	for i, batarang in pairs( btmn.batarangs ) do
+		if (batarang.active) then
+			local rotatePoint = 2;
+			love.graphics.draw(btmn.batarangImg, 
+				batarang.x + rotatePoint + global.tx + global.offsetX, 
+				batarang.y + rotatePoint + global.ty + global.offsetY,
+				math.rad(batarang.angle));
+		end
+	end
 end
 
 --[[ Function ]]--

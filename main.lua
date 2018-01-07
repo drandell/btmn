@@ -12,8 +12,8 @@ require("./Libraries/colors");
 require("./mapObjects");
 
 -- Advanced Tiled Loader Library
-loader = require("./Libraries/AdvTiledLoader/Loader");
-loader.path = "Content/Maps/";
+--loader = require("./Libraries/AdvTiledLoader/Loader");
+--loader.path = "Content/Maps/";
 
 sti = require ("./Libraries/STI");
 sti.path = "Content/Maps/";
