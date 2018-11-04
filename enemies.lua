@@ -107,39 +107,35 @@ function enemy:update( dt, colmap, gameSpeed )
     -- Fighting BTMN
     local delta = (love.timer.getAverageDelta() * 1000);
     self.punchDly = self.punchDly - delta;
-    
-    if (self.punchDly < 0 and self.x > btmn.x and btmn.x + btmn.width + FIGHT_DISTANCE <= self.x + (self.width / 2)) then
-      btmn.health = btmn.health - PUNCH_DMG;
+	
+	if (not btmn.takenDmg) then
+		if (self.punchDly < 0 and self.x > btmn.x and btmn.x + btmn.width + FIGHT_DISTANCE <= self.x + (self.width / 2)) then
+			btmn.health = btmn.health - PUNCH_DMG;
+			self.punchDly = math.random(750, 1050);
+			btmn.takenDmg = true;
+		elseif (self.punchDly < 0 and self.x < btmn.x and btmn.x + btmn.width - FIGHT_DISTANCE >= self.x + (self.width / 2)) then
+			btmn.health = btmn.health - PUNCH_DMG;
+			self.punchDly = math.random(750, 1050);
+			btmn.takenDmg = true;
+		elseif (btmn.x + btmn.width + FIGHT_DISTANCE < self.x and btmn.direction ~= RIGHT) then
+			-- BTMN has moved out of range, so re-chase him down!
+			self.dly = self.dly - delta;
       
-      if (not btmn.takenDmg) then
-        self.punchDly = math.random(550, 1050);
-        btmn.takenDmg = true;
-      end
-    elseif (self.punchDly < 0 and self.x < btmn.x and btmn.x + btmn.width - FIGHT_DISTANCE >= self.x + (self.width / 2)) then
-      btmn.health = btmn.health - PUNCH_DMG;
+			if (self.dly < 0) then
+				self.state = "actioned"
+				self.punchDly = math.random(750, 1050);
+				self.dly = self.oldDly;
+			end
+		elseif (self.x + self.width + FIGHT_DISTANCE < btmn.x and btmn.direction ~= LEFT) then
+			-- BTMN has moved out of range, so re-chase him down!
+			self.dly = self.dly - delta;
       
-      if (not btmn.takenDmg) then
-        self.punchDly = math.random(550, 1050);
-        btmn.takenDmg = true;
-      end
-    elseif (btmn.x + btmn.width + FIGHT_DISTANCE < self.x and btmn.direction ~= RIGHT) then
-     -- BTMN has moved out of range, so re-chase him down!
-      self.dly = self.dly - delta;
-      
-      if (self.dly < 0) then
-        self.state = "actioned"
-        self.punchDly = math.random(500, 1050);
-        self.dly = self.oldDly;
-      end
-    elseif (self.x + self.width + FIGHT_DISTANCE < btmn.x and btmn.direction ~= LEFT) then
-     -- BTMN has moved out of range, so re-chase him down!
-      self.dly = self.dly - delta;
-      
-      if (self.dly < 0) then
-        self.state = "actioned"
-        self.punchDly = math.random(500, 1050);
-        self.dly = self.oldDly;
-      end
+			if (self.dly < 0) then
+				self.state = "actioned"
+				self.punchDly = math.random(500, 1050);
+				self.dly = self.oldDly;
+			end
+		end  
     end
     
   elseif (self.state == "kick") then
