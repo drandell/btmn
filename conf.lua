@@ -5,7 +5,7 @@
 ]]--
 
 -- Some helpful globals
-version = "0.10.1";
+version = "11.1";
 width = 720;
 height = 400;
 -- Locals

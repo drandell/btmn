@@ -58,10 +58,6 @@ function love.load( arg )
     -- ZeroBrane Debug requirement
     if arg[#arg] == "-debug" then require("mobdebug").start(); end
     
-    -- Set Window Icon
-    icon = love.graphics.newImage("Content/Images/icon.png");
-    success = love.window.setIcon( icon:getData() );
-  
     -- States
     addState(menuState, "menu");
     addState(menuOptionsState, "menuOptions");
